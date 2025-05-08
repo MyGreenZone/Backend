@@ -1,23 +1,24 @@
+
 const mongoose = require("mongoose")
 const Schema = mongoose.Schema
-const ObjectId = Schema.ObjectId
+const userSchema = new Schema({
+    phoneNumber: { type: String },
+    email: { type: String },
+    gender: { type: String },
+    avatar: { type: String },
+    verifyPhoneNumber: { type: Boolean, default: false },
+    verifyMail: { type: Boolean, default: false },
+    seed: { type: Number, default: 0 }, // <== Thêm default
+    code: { type: String, default: function () {
+      // Tạo mã ví dụ như: G + thời gian hoặc random
+      const random = Math.floor(100000000 + Math.random() * 900000000);
+      return `G${random}`;
+    }},
+    firstName: { type: String },
+    lastName: { type: String },
+    roles: [{ type: Schema.Types.ObjectId, ref: 'Role' }]
+  });
+  
 
-const user = new Schema({
-    id: {type: ObjectId},
-    name: {
-        type: String,
-        required: true,
-        // unique: true,
-        // trim: true,
-        // maxLength: 30,
-        // minLength: 6,
-        default: 'Nothing'
-    },
-    image: {type: String},
-    email: {type: String},
-    password: {type: String},
-    age: {type: Number},
-    address:  {type: String}
-})
-
-module.exports = mongoose.models.user || mongoose.model("user", user)
+const User = mongoose.models.User || mongoose.model("User", userSchema);
+module.exports = User;

@@ -7,39 +7,23 @@ var logger = require('morgan');
 const cors = require('cors');
 
 
+require("./models/user")
+require("./models/role")
+require("./models/otp")
+
 
 // config mongoose
 const mongoose = require('mongoose')
-require("./models/category")
-require("./models/product")
-require("./models/user")
-require("./models/color")
-require("./models/order")
-
-
-
-
 
 // connect database
 // https://restapirepo.onrender.com/
 
-// mongoose.connect("mongodb://localhost:27017/Furniture")
-mongoose.connect("mongodb+srv://ngocdaibui99:9luzjjPyAZTUtKXF@daingoc99.ulnqr.mongodb.net/Furniture")
+mongoose.connect("mongodb://localhost:27017/MyGreenZone")
+// mongoose.connect("mongodb+srv://ngocdaibui99:9luzjjPyAZTUtKXF@daingoc99.ulnqr.mongodb.net/MyGreenZone")
   .then(() => console.log(">>>>>>>>>> DB Connected!!!!!!"))
   .catch((err) => console.log(">>>>>>>>> DB Error: ", err));
 
-
-
-const userRouter = require('./routes/user');
-const productRouter = require('./routes/product');
-const categoryRouter = require('./routes/category');
-const colorRouter = require('./routes/color');
-const optionRouter = require('./routes/option');
-const favoriteRouter = require('./routes/favorite');
-const orderRouter = require('./routes/order');
-
-
-
+const authRouter = require('./routes/authRoutes');
 var app = express();
 
 // swagger
@@ -61,13 +45,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cors());
 
-app.use('/user', userRouter)
-app.use('/category', categoryRouter)
-app.use('/product', productRouter)
-app.use('/color', colorRouter)
-app.use('/option', optionRouter)
-app.use('/favorite', favoriteRouter)
-app.use('/order', orderRouter)
+app.use('/auth', authRouter);
 
 
 

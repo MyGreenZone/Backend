@@ -3,9 +3,9 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Rest Api Document',
+      title: 'MyGreenZone API',
       version: '1.0.0',
-      description: 'Document swagger',
+      description: 'API Documentation for MyGreenZone'
     },
   },
   apis: ['./routes/*.js'], // Đường dẫn đến các file định nghĩa API
