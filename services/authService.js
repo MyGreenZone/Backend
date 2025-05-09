@@ -58,7 +58,7 @@ const sendOtp = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Send OTP error:', error);
+    console.log('Send OTP error:', error);
     return res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
@@ -122,7 +122,7 @@ const verifyOtp = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Verify OTP error:', error);
+    console.log('Verify OTP error:', error);
     return res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
@@ -203,7 +203,7 @@ const register = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Register error:', error);
+    console.log('Register error:', error);
     return res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
@@ -245,7 +245,7 @@ const getProfile = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get profile error:', error);
+    console.log('Get profile error:', error);
     return res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };

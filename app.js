@@ -10,6 +10,8 @@ const cors = require('cors');
 require("./models/user")
 require("./models/role")
 require("./models/otp")
+require("./models/store")
+require("./models/image")
 
 
 // config mongoose
@@ -24,6 +26,8 @@ mongoose.connect("mongodb://localhost:27017/MyGreenZone")
   .catch((err) => console.log(">>>>>>>>> DB Error: ", err));
 
 const authRouter = require('./routes/authRoutes');
+const storeRouter = require('./routes/storeRoutes');
+const fileRouter = require('./routes/fileRoutes');
 var app = express();
 
 // swagger
@@ -46,6 +50,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
 app.use('/auth', authRouter);
+app.use('/v1/store', storeRouter);
+app.use('/file', fileRouter);
 
 
 

@@ -1,11 +1,3 @@
-const userModel = require("../models/user");
-const mongoose = require('mongoose');
-const upload = require("../utils/multerconfig");
-const sendMail = require("../utils/mailconfig");
-const JWT = require('jsonwebtoken');
-const config = require("../utils/configEnv");
-const fs = require('fs').promises;
-
 const express = require('express');
 const { sendOtp, verifyOtp, register, getProfile } = require('../services/authService');
 /**
@@ -125,7 +117,7 @@ authRouter.post('/otp/register', register)
  * /auth/profile:
  *   get:
  *     tags: [Auth]
- *     summary: Lấy thông tin người dùng đã đăng nhập
+ *     summary: Get user profile
  *     security:
  *       - bearerAuth: []
  *     responses:
