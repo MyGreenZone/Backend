@@ -1,7 +1,7 @@
 // routes/fileRoutes.js
-const multer = require('multer');
+
 const express = require('express');
-const upload = require('../utils/upload');  // Import config multer
+const upload = require('../configs/uploadConfig');
 const { uploadSingleFile } = require('../services/fileService');
 const authenticateJWT = require('../middleware/auth');  // Import middleware xác thực JWT
 
@@ -15,7 +15,7 @@ const fileRouter = express.Router();
  *   post:
  *     summary: Upload một file hình ảnh lên Cloudinary
  *     tags:
- *       - Files
+ *       - File
  *     security:
  *       - bearerAuth: []
  *     requestBody:

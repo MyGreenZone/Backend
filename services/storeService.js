@@ -1,38 +1,41 @@
-const Store = require('../models/store');
+const Store = require('../models/storeSchema');
 const mongoose = require('mongoose');
+const { checkPassword } = require('../utils/checkPassword')
 
 const createStore = async (req, res) => {
     try {
         const { password, name, phoneNumber, images, openTime, closeTime, address, latitude, longitude } = req.body;
 
         if (!password) {
-            return res.status(400).json({ success: false, message: 'Password is required', statusCode: 400 });
+            return res.status(400).json({ statusCode: 400, success: false, message: 'Password is required' });
         }
 
         if (password !== 'admin123') {
-            return res.status(400).json({ success: false, message: 'Wrong password', statusCode: 400 });
+            return res.status(400).json({ statusCode: 400, success: false, message: 'Wrong password' });
         }
+
 
         let store = await Store.findOne({ phoneNumber });
         if (store) {
             return res.status(400).json({
+                statusCode: 400,
                 success: false,
                 message: 'Số điện thoại này đã đăng ký Store trước đó',
-                statusCode: 400
+
             });
         }
 
         store = await Store.create({ name, phoneNumber, images, openTime, closeTime, address, latitude, longitude });
         return res.status(201).json({
+            statusCode: 201,
             success: true,
             message: 'Store created successfully',
-            data: store,
-            statusCode: 201
+            data: store
         });
 
     } catch (error) {
         console.log('Create store error:', error);
-        return res.status(500).json({ success: false, message: 'Internal server error', statusCode: 500 });
+        return res.status(500).json({ statusCode: 500, success: false, message: 'Internal server error' });
     }
 };
 
@@ -51,8 +54,8 @@ const getAllStores = async (req, res) => {
             .limit(limit);
 
         return res.status(200).json({
-            success: true,
             statusCode: 200,
+            success: true,
             data: {
                 page,
                 limit,
@@ -63,7 +66,7 @@ const getAllStores = async (req, res) => {
         });
     } catch (error) {
         console.log('Get all stores error:', error);
-        return res.status(500).json({ success: false, message: 'Internal server error', statusCode: 500 });
+        return res.status(500).json({ statusCode: 500, success: false, message: 'Internal server error' });
     }
 };
 
@@ -72,17 +75,17 @@ const getStoreDetail = async (req, res) => {
         const { storeId } = req.params;
 
         if (!storeId) {
-            return res.status(400).json({ success: false, message: 'StoreId is required', statusCode: 400 });
+            return res.status(400).json({ statusCode: 400, success: false, message: 'StoreId is required' });
         }
 
         if (!mongoose.Types.ObjectId.isValid(storeId)) {
-            return res.status(400).json({ success: false, message: 'Invalid storeId', statusCode: 400 });
+            return res.status(400).json({ statusCode: 400, success: false, message: 'Invalid storeId' });
         }
 
         const store = await Store.findById(storeId);
 
         if (!store) {
-            return res.status(404).json({ success: false, message: 'Store not found', statusCode: 404 });
+            return res.status(404).json({ statusCode: 404, success: false, message: 'Store not found' });
         }
 
         return res.status(200).json({
@@ -94,7 +97,7 @@ const getStoreDetail = async (req, res) => {
 
     } catch (error) {
         console.error('Get store detail error:', error);
-        return res.status(500).json({ success: false, message: 'Internal server error', statusCode: 500 });
+        return res.status(500).json({ statusCode: 500, success: false, message: 'Internal server error' });
     }
 };
 
@@ -114,15 +117,15 @@ const updateStore = async (req, res) => {
         } = req.body;
 
         if (!password) {
-            return res.status(400).json({ success: false, message: 'Password is required', statusCode: 400 });
+            return res.status(400).json({ statusCode: 400, success: false, message: 'Password is required' });
         }
 
         if (password !== 'admin123') {
-            return res.status(400).json({ success: false, message: 'Wrong password', statusCode: 400 });
+            return res.status(400).json({ statusCode: 400, success: false, message: 'Wrong password'});
         }
 
         if (!mongoose.Types.ObjectId.isValid(storeId)) {
-            return res.status(400).json({ success: false, message: 'Invalid storeId', statusCode: 400 });
+            return res.status(400).json({statusCode: 400, success: false, message: 'Invalid storeId'});
         }
 
         const store = await Store.findByIdAndUpdate(
@@ -141,19 +144,19 @@ const updateStore = async (req, res) => {
         );
 
         if (!store) {
-            return res.status(404).json({ success: false, message: 'Store not found', statusCode: 404 });
+            return res.status(404).json({statusCode: 404, success: false, message: 'Store not found'});
         }
 
         return res.status(200).json({
+            statusCode: 200,
             success: true,
             message: 'Store updated successfully',
             data: store,
-            statusCode: 200
         });
 
     } catch (error) {
         console.log('Update store error:', error);
-        return res.status(500).json({ success: false, message: 'Internal server error', statusCode: 500 });
+        return res.status(500).json({statusCode: 500, success: false, message: 'Internal server error' });
     }
 };
 

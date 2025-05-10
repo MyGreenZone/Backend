@@ -1,5 +1,5 @@
 const cloudinary = require('cloudinary').v2;
-const config = require("../utils/configEnv");
+const config = require("../configs/envConfig");
 // Cấu hình Cloudinary
 cloudinary.config({
   cloud_name: config.CLOUDINARY_CLOUD_NAME, 

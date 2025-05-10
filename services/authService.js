@@ -1,9 +1,9 @@
 
 // authController.js
-const User = require('../models/user')
-const OtpRequest = require('../models/otp')
+const User = require('../models/userSchema')
+const OtpRequest = require('../models/otpSchema')
 const jwt = require('jsonwebtoken');
-const config = require("../utils/configEnv");
+const config = require("../configs/envConfig");
 const generateOtpCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 const sendOtp = async (req, res) => {
@@ -143,23 +143,23 @@ const register = async (req, res) => {
     try {
       payload = jwt.verify(token, config.SECRETKEY);
     } catch (err) {
-      return res.status(401).json({ success: false, message: 'Invalid or expired token' });
+      return res.status(401).json({ statusCode: 401, success: false, message: 'Invalid or expired token' });
     }
 
     const phoneNumber = payload.phoneNumber;
     if (!phoneNumber) {
-      return res.status(400).json({ success: false, message: 'Invalid token: missing phone number' });
+      return res.status(400).json({ statusCode: 400, success: false, message: 'Invalid token: missing phone number' });
     }
 
     const user = await User.findOne({ phoneNumber }).populate('roles');
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res.status(404).json({ statusCode: 404, success: false, message: 'User not found' });
     }
 
     const { firstName, lastName, email, dateOfBirth, gender } = req.body;
 
     if (!lastName || typeof lastName !== 'string' || lastName.trim() === '') {
-      return res.status(400).json({ success: false, message: 'lastName is required' });
+      return res.status(400).json({ statusCode: 400, success: false, message: 'lastName is required' });
     }
 
     // Cập nhật thông tin
@@ -214,7 +214,7 @@ const getProfile = async (req, res) => {
     // Lấy token từ header
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ success: false, message: 'Authorization token missing' });
+      return res.status(401).json({ statusCode: 401, success: false, message: 'Authorization token missing' });
     }
 
     const token = authHeader.split(' ')[1];
@@ -224,18 +224,18 @@ const getProfile = async (req, res) => {
     try {
       payload = jwt.verify(token, config.SECRETKEY);
     } catch (err) {
-      return res.status(401).json({ success: false, message: 'Invalid or expired token' });
+      return res.status(401).json({ statusCode: 4011, success: false, message: 'Invalid or expired token' });
     }
 
     const phoneNumber = payload.phoneNumber;
     if (!phoneNumber) {
-      return res.status(400).json({ success: false, message: 'Invalid token: missing phone number' });
+      return res.status(400).json({ statusCode: 400, success: false, message: 'Invalid token: missing phone number' });
     }
 
     // Tìm người dùng theo số điện thoại
     const user = await User.findOne({ phoneNumber }).populate('roles');
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res.status(404).json({ statusCode: 404, success: false, message: 'User not found' });
     }
 
     // Trả về thông tin người dùng
@@ -246,10 +246,10 @@ const getProfile = async (req, res) => {
 
   } catch (error) {
     console.log('Get profile error:', error);
-    return res.status(500).json({ success: false, message: 'Internal server error' });
+    return res.status(500).json({ statusCode: 500, success: false, message: 'Internal server error' });
   }
 };
 
 
 
-module.exports = {sendOtp, verifyOtp, register, getProfile}
+module.exports = { sendOtp, verifyOtp, register, getProfile }

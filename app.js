@@ -7,11 +7,12 @@ var logger = require('morgan');
 const cors = require('cors');
 
 
-require("./models/user")
-require("./models/role")
-require("./models/otp")
-require("./models/store")
-require("./models/image")
+require("./models/userSchema")
+require("./models/roleSchema")
+require("./models/otpSchema")
+require("./models/storeSchema")
+require("./models/imageSchema")
+require("./models/employeeSchema")
 
 
 // config mongoose
@@ -28,11 +29,14 @@ mongoose.connect("mongodb://localhost:27017/MyGreenZone")
 const authRouter = require('./routes/authRoutes');
 const storeRouter = require('./routes/storeRoutes');
 const fileRouter = require('./routes/fileRoutes');
+const employeeRouter = require('./routes/employeeRoutes');
+
+
 var app = express();
 
 // swagger
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./utils/configSwagger');
+const swaggerDocument = require('./configs/swaggerConfig');
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 
@@ -52,6 +56,7 @@ app.use(cors());
 app.use('/auth', authRouter);
 app.use('/v1/store', storeRouter);
 app.use('/file', fileRouter);
+app.use('/v1/employee', employeeRouter);
 
 
 
