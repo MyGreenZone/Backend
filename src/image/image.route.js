@@ -3,7 +3,7 @@
 const express = require('express');
 const upload = require('../../configs/uploadConfig');
 const { uploadSingleFile } = require('./image.controller');
-const authenticateJWT = require('../middleware/auth');  // Import middleware xác thực JWT
+const authenticateJWT = require('../../middleware/auth');  // Import middleware xác thực JWT
 
 const fileRouter = express.Router();
 
