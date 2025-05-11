@@ -1,6 +1,6 @@
 const express = require('express');
 const employeeRouter = express.Router()
-const {createEmployee, getAllEmployees, getEmployeeDetail, updateEmployee, getAvailableEmployees} = require('../services/employeeService')
+const { createEmployee, getAllEmployees, getEmployeeDetail, updateEmployee, getAvailableEmployees } = require('./employee.controller')
 
 
 /**

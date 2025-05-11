@@ -1,6 +1,6 @@
 
-const Employee = require('../models/employeeSchema')
-const Store = require('../models/storeSchema')
+const Employee = require('../employee/employee.schema')
+const Store = require('../store/store.schema')
 const mongoose = require('mongoose')
 
 const createEmployee = async (req, res) => {

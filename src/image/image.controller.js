@@ -1,8 +1,8 @@
-const Image = require('../models/imageSchema')
+const Image = require('./image.schema')
 const uploadSingleFile = async (req, res) => {
     try {
         if (!req.file) {
-            return res.status(400).json({statusCode: 400, message: 'No file uploaded' });
+            return res.status(400).json({ statusCode: 400, message: 'No file uploaded' });
         }
 
         // Lưu ảnh vào DB

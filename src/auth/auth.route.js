@@ -1,5 +1,5 @@
 const express = require('express');
-const { sendOtp, verifyOtp, register, getProfile } = require('../services/authService');
+const { sendOtp, verifyOtp, register, getProfile } = require('./auth.controller');
 /**
  * @swagger
  * components:

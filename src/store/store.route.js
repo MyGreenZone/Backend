@@ -1,6 +1,6 @@
 const express = require('express');
 const storeRouter = express.Router()
-const {createStore, getAllStores, getStoreDetail, updateStore} = require('../services/storeService')
+const { createStore, getAllStores, getStoreDetail, updateStore } = require('./store.controller')
 
 
 /**

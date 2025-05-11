@@ -1,7 +1,7 @@
 // middleware/auth.js
 
 const jwt = require('jsonwebtoken');
-const config = require("../configs/envConfig");
+const config = require("../../configs/envConfig");
 // Middleware kiểm tra JWT
 const authenticateJWT = (req, res, next) => {
   const token = req.header('Authorization')?.split(' ')[1];  // Lấy token từ header Authorization

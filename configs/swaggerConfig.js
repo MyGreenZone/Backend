@@ -8,7 +8,7 @@ const options = {
       description: 'API Documentation for MyGreenZone'
     },
   },
-  apis: ['./routes/*.js'], // Đường dẫn đến các file định nghĩa API
+  apis: ["./**/*.route.js"], 
 };
 const swaggerSpec = swaggerJSDoc(options);
 module.exports = swaggerSpec;

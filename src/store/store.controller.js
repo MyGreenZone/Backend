@@ -1,6 +1,6 @@
-const Store = require('../models/storeSchema');
+const Store = require('./store.schema');
 const mongoose = require('mongoose');
-const { checkPassword } = require('../utils/checkPassword')
+
 
 const createStore = async (req, res) => {
     try {
@@ -121,11 +121,11 @@ const updateStore = async (req, res) => {
         }
 
         if (password !== 'admin123') {
-            return res.status(400).json({ statusCode: 400, success: false, message: 'Wrong password'});
+            return res.status(400).json({ statusCode: 400, success: false, message: 'Wrong password' });
         }
 
         if (!mongoose.Types.ObjectId.isValid(storeId)) {
-            return res.status(400).json({statusCode: 400, success: false, message: 'Invalid storeId'});
+            return res.status(400).json({ statusCode: 400, success: false, message: 'Invalid storeId' });
         }
 
         const store = await Store.findByIdAndUpdate(
@@ -144,7 +144,7 @@ const updateStore = async (req, res) => {
         );
 
         if (!store) {
-            return res.status(404).json({statusCode: 404, success: false, message: 'Store not found'});
+            return res.status(404).json({ statusCode: 404, success: false, message: 'Store not found' });
         }
 
         return res.status(200).json({
@@ -156,7 +156,7 @@ const updateStore = async (req, res) => {
 
     } catch (error) {
         console.log('Update store error:', error);
-        return res.status(500).json({statusCode: 500, success: false, message: 'Internal server error' });
+        return res.status(500).json({ statusCode: 500, success: false, message: 'Internal server error' });
     }
 };
 

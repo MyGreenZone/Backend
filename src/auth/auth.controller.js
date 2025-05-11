@@ -1,9 +1,9 @@
 
 // authController.js
-const User = require('../models/userSchema')
-const OtpRequest = require('../models/otpSchema')
+const User = require('./user.schema')
+const Otp = require('../otp/otp.schema')
 const jwt = require('jsonwebtoken');
-const config = require("../configs/envConfig");
+const config = require("../../configs/envConfig");
 const generateOtpCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 const sendOtp = async (req, res) => {
@@ -33,7 +33,7 @@ const sendOtp = async (req, res) => {
     const expiredAt = new Date(Date.now() + 10 * 60 * 1000); // OTP hết hạn sau 10 phút
 
     // Lưu thông tin OTP vào database
-    const otp = await OtpRequest.create({
+    const otp = await Otp.create({
       user: user._id,
       type: 'login',
       code,
@@ -77,7 +77,7 @@ const verifyOtp = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    const otp = await OtpRequest.findOne({
+    const otp = await Otp.findOne({
       user: user._id,
       code,
       type: 'login',
@@ -89,7 +89,7 @@ const verifyOtp = async (req, res) => {
     }
 
     // Xóa OTP sau khi dùng
-    await OtpRequest.deleteOne({ _id: otp._id });
+    await Otp.deleteOne({ _id: otp._id });
 
     // Tạo token
     const accessToken = jwt.sign(
