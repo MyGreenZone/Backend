@@ -50,7 +50,6 @@ const fileRouter = express.Router();
  */
 fileRouter.post(
     '/image/upload',
-    authenticateJWT,
     upload.single('file'),
     uploadSingleFile
 );

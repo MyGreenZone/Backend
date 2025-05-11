@@ -15,11 +15,13 @@ require("./otp/otp.schema")
 require("./store/store.schema")
 require("./image/image.schema")
 require("./employee/employee.schema")
+require("./category/category.schema")
 
 const authRouter = require('./auth/auth.route');
 const storeRouter = require('./store/store.route');
 const imageRouter = require('./image/image.route');
 const employeeRouter = require('./employee/employee.route');
+const categoryRouter = require('./category/category.route');
 
 // https://restapirepo.onrender.com/
 mongoose.connect("mongodb://localhost:27017/MyGreenZone")
@@ -40,6 +42,7 @@ app.use('/auth', authRouter);
 app.use('/v1/store', storeRouter);
 app.use('/file', imageRouter);
 app.use('/v1/employee', employeeRouter);
+app.use('/v1/category', categoryRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

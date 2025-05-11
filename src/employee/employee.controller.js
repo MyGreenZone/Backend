@@ -56,7 +56,7 @@ const createEmployee = async (req, res) => {
 
     } catch (error) {
         console.log('Register error:', error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return res.status(500).json({ statusCode: 500, success: false, message: 'Internal server error' });
     }
 }
 
@@ -91,7 +91,7 @@ const updateEmployee = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(employeeId)) {
             return res.status(400).json({ statusCode: 400, success: false, message: 'ID nhân viên không hợp lệ' });
         }
-        
+
 
         const { password, firstName, lastName, email, gender, avatar, workingStore } = req.body;
         if (!password) {
