@@ -162,4 +162,85 @@ categoryRouter.get('/all', categoryController.getAllCategories);
 
 
 
+/**
+ * @swagger
+ * /v1/category/{categoryId}:
+ *   put:
+ *     summary: Cập nhật thông tin một danh mục
+ *     tags:
+ *       - Category
+ *     parameters:
+ *       - in: path
+ *         name: categoryId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của danh mục cần cập nhật
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - icon
+ *               - password
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 example: "admin123"
+ *               name:
+ *                 type: string
+ *                 example: "Trà sữa"
+ *               icon:
+ *                 type: string
+ *                 format: uri
+ *                 example: "https://example.com/icon.png"
+ *              
+ *     responses:
+ *       200:
+ *         description: Cập nhật danh mục thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: number
+ *                   example: 200
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Cập nhật category thành công
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Dữ liệu không hợp lệ hoặc sai categoryId
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: number
+ *                   example: 400
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Sai định dạng categoryId
+ *       404:
+ *         description: Không tìm thấy danh mục
+ *       500:
+ *         description: Lỗi server
+ */
+categoryRouter.put('/:categoryId', categoryController.updateCategory);
+
+
+
+
 module.exports = categoryRouter

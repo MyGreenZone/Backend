@@ -1,11 +1,13 @@
 // category.controller.js
 
 const categoryService = require('./category.service')
-const { createCategoryValidator } = require('./category.validator')
+const { categoryValidator } = require('./category.validator')
+const mongoose = require('mongoose')
+
 
 const categoryController = {
     async createCategory(req, res) {
-        const { value, error } = createCategoryValidator.validate(req.body, { abortEarly: false })
+        const { value, error } = categoryValidator.validate(req.body, { abortEarly: false })
 
         if (error) {
             const errors = error.details.map((err) => {
@@ -29,7 +31,6 @@ const categoryController = {
                 message: 'Lỗi khi tạo danh mục',
             });
         }
-
     },
 
 
@@ -45,6 +46,38 @@ const categoryController = {
                 message: 'Error get all categories',
             });
         }
+    },
+
+    async updateCategory(req, res) {
+        const { categoryId } = req.params
+        if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+            return res.status(400).json({ statusCode: 400, success: false, message: 'Sai định dạng categoryId' });
+        }
+
+        const { value, error } = categoryValidator.validate(req.body, { abortEarly: false })
+        if (error) {
+            const errors = error.details.map((err) => {
+                return { message: err.message, field: err.context.label }
+            })
+            return res.status(400).json({
+                statusCode: 400,
+                success: false,
+                errors: errors
+            })
+        }
+
+        try {
+            const newCategory = await categoryService.updateCategory(categoryId, value)
+            return res.status(newCategory.statusCode).json(newCategory)
+        } catch (error) {
+            console.log("Error updating category:", error);
+            return res.status(500).json({
+                statusCode: 500,
+                success: false,
+                message: 'Lỗi khi update danh mục',
+            });
+        }
+
     }
 }
 
