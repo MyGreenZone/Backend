@@ -23,4 +23,4 @@ const categoryValidator = Joi.object({
 })
 
 
-module.exports = { categoryValidator }
+module.exports =  categoryValidator 

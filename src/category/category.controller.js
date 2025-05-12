@@ -1,7 +1,7 @@
 // category.controller.js
 
 const categoryService = require('./category.service')
-const { categoryValidator } = require('./category.validator')
+const categoryValidator = require('./category.validator')
 const mongoose = require('mongoose')
 
 

@@ -2,6 +2,10 @@
 const Category = require('./category.schema')
 const categoryService = {
     async createCategory(data) {
+        const existing = await Category.findOne({ name: data.name })
+        if (existing) {
+            return { statusCode: 409, message: 'This category name has been existed' }
+        }
         const newCategory = await Category.create(data)
         return { statusCode: 201, message: 'Created category successfully', data: newCategory }
     },
@@ -16,6 +20,7 @@ const categoryService = {
             new: true,
             runValidators: true,
         });
+
         if (!newCategory) {
             return { statusCode: 404, success: false, message: 'Không tìm thấy Category' };
         }

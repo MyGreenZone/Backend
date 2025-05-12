@@ -25,9 +25,7 @@ const createDefaultRoles = async () => {
 
       await newRole.save();
       console.log(`Default '${roleName}' role created successfully.`);
-    } else {
-      console.log(`Role '${roleName}' already exists.`);
-    }
+    } 
   }
 };
 
