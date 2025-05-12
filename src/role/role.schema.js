@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const { MODEL_NAMES, ROLE } = require('../../constants')
 
-// Schema cho Role
 const roleSchema = new Schema(
   {
     name: { type: String, required: true },
@@ -10,11 +10,11 @@ const roleSchema = new Schema(
 );
 
 // Tạo model Role
-const Role = mongoose.models.Role || mongoose.model("Role", roleSchema);
+const Role = mongoose.models.Role || mongoose.model(MODEL_NAMES.ROLE, roleSchema);
 
 // Hàm để tạo các Role mặc định nếu chưa có
 const createDefaultRoles = async () => {
-  const roles = ['customer', 'merchant', 'admin']; // Các role cần tạo
+  const roles = ROLE.getRoles()
 
   for (const roleName of roles) {
     const roleExists = await Role.findOne({ name: roleName });  // Kiểm tra nếu role đã tồn tại
@@ -25,7 +25,7 @@ const createDefaultRoles = async () => {
 
       await newRole.save();
       console.log(`Default '${roleName}' role created successfully.`);
-    } 
+    }
   }
 };
 

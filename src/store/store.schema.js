@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-
+const { MODEL_NAMES } = require('../../constants')
 const storeSchema = new Schema({
     name: {
         type: String,
@@ -38,5 +38,5 @@ const storeSchema = new Schema({
     timestamps: true
 });
 
-const Store = mongoose.models.Store || mongoose.model("Store", storeSchema);
+const Store = mongoose.models.Store || mongoose.model(MODEL_NAMES.STORE, storeSchema);
 module.exports = Store;

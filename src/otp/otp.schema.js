@@ -1,13 +1,14 @@
 const mongoose = require("mongoose")
 const Schema = mongoose.Schema
+const { MODEL_NAMES } = require('../../constants')
 
-// Interface IOtpRequest không thể sử dụng trong CommonJS, bạn có thể thay thế bằng cách sử dụng loại dữ liệu thông qua kiểu Schema.
+
 const otpSchema = new Schema({
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    user: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.USER, required: true },
     type: { type: String, default: 'login' },
     code: { type: String, required: true },
     expired: { type: Date, required: true }
 }, { timestamps: true });
 
-const Otp = mongoose.models.Otp || mongoose.model("Otp", otpSchema)
+const Otp = mongoose.models.Otp || mongoose.model(MODEL_NAMES.OTP, otpSchema)
 module.exports = Otp
