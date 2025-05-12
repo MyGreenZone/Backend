@@ -8,7 +8,7 @@ const MODEL_NAMES = Object.freeze({
     USER: 'User',
     PRODUCT: 'Product',
     TOPPING: 'Topping',
-    SIZE: 'Size'
+    VARIANT: 'Variant'
 })
 
 module.exports = MODEL_NAMES;

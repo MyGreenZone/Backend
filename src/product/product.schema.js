@@ -9,11 +9,7 @@ const productSchema = new Schema({
     description: { type: String, required: true },
     image: { type: String, required: true },
     categoryIds: [{ type: Schema.Types.ObjectId, ref: MODEL_NAMES.CATEGORY }],
-    sizes: [{
-        sizeId: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.SIZE, required: true },
-        sellingPrice: { type: Number, required: true }
-    }],
     toppingIds: [{ type: Schema.Types.ObjectId, ref: MODEL_NAMES.TOPPING }],
-})
+}, { timestamps: true });
 const Product = mongoose.models.Product || mongoose.model(MODEL_NAMES.PRODUCT, productSchema);
 module.exports = Product;
