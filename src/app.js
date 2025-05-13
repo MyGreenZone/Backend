@@ -24,6 +24,7 @@ const imageRouter = require('./image/image.route');
 const employeeRouter = require('./employee/employee.route');
 const categoryRouter = require('./category/category.route');
 const toppingRouter = require('./topping/topping.route');
+const productRouter = require('./product/product.route');
 
 // https://restapirepo.onrender.com/
 mongoose.connect("mongodb://localhost:27017/MyGreenZone")
@@ -46,6 +47,7 @@ app.use('/file', imageRouter);
 app.use('/v1/employee', employeeRouter);
 app.use('/v1/category', categoryRouter);
 app.use('/v1/topping', toppingRouter);
+app.use('/v1/product', productRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

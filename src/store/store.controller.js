@@ -1,5 +1,6 @@
 const Store = require('./store.schema');
 const mongoose = require('mongoose');
+const { KEY } = require('../../constants')
 
 
 const createStore = async (req, res) => {
@@ -10,7 +11,7 @@ const createStore = async (req, res) => {
             return res.status(400).json({ statusCode: 400, success: false, message: 'Password is required' });
         }
 
-        if (password !== 'admin123') {
+        if (password !== KEY.ADMIN_PASSWORD) {
             return res.status(400).json({ statusCode: 400, success: false, message: 'Wrong password' });
         }
 
@@ -120,7 +121,7 @@ const updateStore = async (req, res) => {
             return res.status(400).json({ statusCode: 400, success: false, message: 'Password is required' });
         }
 
-        if (password !== 'admin123') {
+        if (password !== KEY.ADMIN_PASSWORD) {
             return res.status(400).json({ statusCode: 400, success: false, message: 'Wrong password' });
         }
 

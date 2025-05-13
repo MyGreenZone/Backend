@@ -1,4 +1,4 @@
-// src/utils/joiMessages.js
+// utils/joiMessages.js
 const joiMessages = {
     
     string: {
@@ -20,6 +20,9 @@ const joiMessages = {
       only: '{#label} không đúng giá trị hợp lệ',
       invalid: '{#label} có giá trị không được phép',
       required: 'Trường {#label} là bắt buộc',
+    },
+    array: {
+      base: '{#label} phải là mảng'
     }
   };
   

@@ -1,10 +1,11 @@
 const Joi = require('joi')
 const joiMessages = require('../../utils/joiMessages')
+const { KEY } = require('../../constants')
 
 const categoryValidator = Joi.object({
     password: Joi.string()
         .trim()
-        .valid('admin123')
+        .valid(KEY.ADMIN_PASSWORD)
         .required()
         .messages({
             'any.required': joiMessages.any.required,
@@ -23,4 +24,4 @@ const categoryValidator = Joi.object({
 })
 
 
-module.exports =  categoryValidator 
+module.exports = categoryValidator 

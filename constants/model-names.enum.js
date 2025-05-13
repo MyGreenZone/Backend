@@ -1,14 +1,18 @@
 const MODEL_NAMES = Object.freeze({
-    ROLE: 'Role',
-    STORE: 'Store',
-    CATEGORY: 'Category',
-    EMPLOYEE: 'Employee',
-    IMAGE: 'Image',
     OTP: 'Otp',
     USER: 'User',
+    ROLE: 'Role',
+
+    STORE: 'Store',
+    EMPLOYEE: 'Employee',
+
+    IMAGE: 'Image',
+
+    CATEGORY: 'Category',
     PRODUCT: 'Product',
-    TOPPING: 'Topping',
-    VARIANT: 'Variant'
+    VARIANT: 'Variant',
+    TOPPING: 'Topping'
+   
 })
 
 module.exports = MODEL_NAMES;

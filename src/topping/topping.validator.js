@@ -1,10 +1,11 @@
 const Joi = require('joi')
 const joiMessages = require('../../utils/joiMessages')
+const { KEY } = require('../../constants')
 const toppingValidator = Joi.object({
     password: Joi.string()
         .trim()
         .required()
-        .valid('admin123')
+        .valid(KEY.ADMIN_PASSWORD)
         .messages({
             'any.required': joiMessages.any.required,
             'any.only': joiMessages.any.only,

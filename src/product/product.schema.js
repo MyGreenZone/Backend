@@ -11,5 +11,6 @@ const productSchema = new Schema({
     categoryIds: [{ type: Schema.Types.ObjectId, ref: MODEL_NAMES.CATEGORY }],
     toppingIds: [{ type: Schema.Types.ObjectId, ref: MODEL_NAMES.TOPPING }],
 }, { timestamps: true });
+
 const Product = mongoose.models.Product || mongoose.model(MODEL_NAMES.PRODUCT, productSchema);
 module.exports = Product;

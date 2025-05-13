@@ -2,7 +2,7 @@
 const Employee = require('../employee/employee.schema')
 const Store = require('../store/store.schema')
 const mongoose = require('mongoose')
-
+const { KEY } = require('../../constants')
 const createEmployee = async (req, res) => {
     try {
         const {
@@ -20,7 +20,7 @@ const createEmployee = async (req, res) => {
             return res.status(400).json({ statusCode: 400, success: false, message: 'Password is required' });
         }
 
-        if (password !== 'admin123') {
+        if (password !== KEY.ADMIN_PASSWORD) {
             return res.status(400).json({ statusCode: 400, success: false, message: 'Wrong password' });
         }
         if (!mongoose.Types.ObjectId.isValid(workingStore)) {
@@ -98,7 +98,7 @@ const updateEmployee = async (req, res) => {
             return res.status(400).json({ statusCode: 400, success: false, message: 'Password is required' });
         }
 
-        if (password !== 'admin123') {
+        if (password !== KEY.ADMIN_PASSWORD) {
             return res.status(400).json({ statusCode: 400, success: false, message: 'Wrong password' });
         }
         // Kiểm tra lastName không được bỏ trống
