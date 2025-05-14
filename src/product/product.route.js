@@ -111,7 +111,83 @@ const productRouter = express.Router()
  */
 productRouter.post('/create', productController.createProduct)
 
-productRouter.get('/all', productController.getAllProducts)
+
+
+
+/**
+ * @swagger
+ * /v1/product/all:
+ *   get:
+ *     summary: Get all products with categories
+ *     tags:
+ *       - Product
+ *     description: Retrieve a list of all products grouped by their categories.
+ *     responses:
+ *       200:
+ *         description: Successfully fetched products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   description: Status code of the response.
+ *                   example: 200
+ *                 success:
+ *                   type: boolean
+ *                   description: Whether the request was successful.
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   description: A message providing additional information about the request.
+ *                   example: "Get all products successfully"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         description: Category ID.
+ *                         example: "68207de10674b854f908edad"
+ *                       name:
+ *                         type: string
+ *                         description: Category name.
+ *                         example: "Trà sữa"
+ *                       icon:
+ *                         type: string
+ *                         description: Icon URL for the category.
+ *                         example: "https://res.cloudinary.com/dxhejgve0/image/upload/v1746961436/uploads/neqlsnjep05diiyd0glz.png"
+ *                       products:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             _id:
+ *                               type: string
+ *                               description: Product ID.
+ *                               example: "682402301261afcbcc29c3ca"
+ *                             name:
+ *                               type: string
+ *                               description: Product name.
+ *                               example: "Capuchino Lavender"
+ *                             description:
+ *                               type: string
+ *                               description: Product description.
+ *                               example: "A special twist on traditional cappuccino..."
+ *                             image:
+ *                               type: string
+ *                               description: Product image URL.
+ *                               example: "https://res.cloudinary.com/dxhejgve0/image/upload/v1747129926/uploads/dtbhhibef6mvbo4i469v.jpg"
+ *       500:
+ *         description: Internal server error
+ */
+productRouter.get('/all', productController.getAllProducts);
+
+
+
+
 /**
  * @swagger
  * /v1/product/{productId}:

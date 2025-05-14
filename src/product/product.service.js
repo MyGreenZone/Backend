@@ -1,4 +1,5 @@
 const Product = require('./product.schema');
+const Category = require('../category/category.schema')
 const Topping = require('../topping/topping.schema');
 const Variant = require('../variant/variant.schema');
 const mongoose = require('mongoose');
@@ -103,9 +104,28 @@ const productService = {
     },
 
 
-    async getAllProducts(){
-        const products = await Product.find()
-        return {statusCode: 200, success: true, message: 'Get all product successfully', data: products}
+    async getAllProducts() {
+
+        const categories = await Category.find({}).lean()
+
+        const data = await Promise.all(
+            categories.map(async cate => {
+               
+                const products = await Product.find({ categoryIds: { $in: [cate._id] } }).lean();
+                const productData = products.map(product => {
+                    return {
+                        _id: product._id,
+                        name: product.name,
+                        description: product.description,
+                        image: product.image,
+                    }
+
+                })
+                return { ...cate, products: productData }
+            })
+        )
+
+        return { statusCode: 200, success: true, message: 'Get all product successfully', data: data }
     }
 }
 
