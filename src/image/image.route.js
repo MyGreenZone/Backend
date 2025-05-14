@@ -30,7 +30,7 @@ const fileRouter = express.Router();
  *                 format: binary
  *                 description: File ảnh cần upload
  *     responses:
- *       200:
+ *       201:
  *         description: Upload thành công
  *         content:
  *           application/json:

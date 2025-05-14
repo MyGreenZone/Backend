@@ -68,8 +68,11 @@ const productService = {
                 name: newProduct.name,
                 description: newProduct.description,
                 image: newProduct.image,
-                topping: toppingDetails,
-                variant: variants
+                sellingPrice: newProduct.sellingPrice,
+                createdAt: newProduct.createdAt,
+                updatedAt: newProduct.updatedAt,
+                variant: variants,
+                topping: toppingDetails
             }
         };
     },
@@ -97,6 +100,9 @@ const productService = {
                 name: product.name,
                 description: product.description,
                 image: product.image,
+                sellingPrice: product.sellingPrice,
+                createdAt: product.createdAt,
+                updatedAt: product.updatedAt,
                 variant: variants,
                 topping: toppings
             }
@@ -110,7 +116,7 @@ const productService = {
 
         const data = await Promise.all(
             categories.map(async cate => {
-               
+
                 const products = await Product.find({ categoryIds: { $in: [cate._id] } }).lean();
                 const productData = products.map(product => {
                     return {
@@ -118,6 +124,9 @@ const productService = {
                         name: product.name,
                         description: product.description,
                         image: product.image,
+                        sellingPrice: product.sellingPrice,
+                        createdAt: product.createdAt,
+                        updatedAt: product.updatedAt,
                     }
 
                 })

@@ -18,6 +18,9 @@ const productRouter = express.Router()
  *           schema:
  *             type: object
  *             properties:
+ *               password:
+ *                 type: string
+ *                 example: admin123
  *               name:
  *                 type: string
  *               description:
@@ -40,6 +43,7 @@ const productRouter = express.Router()
  *                 items:
  *                   type: string
  *             example:
+ *               password: admin123
  *               name: "Trà sữa thái xanh"
  *               description: "Ngon và mát"
  *               defaultSellingPrice: 10000

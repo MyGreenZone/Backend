@@ -8,9 +8,10 @@ const uploadSingleFile = async (req, res) => {
         // Lưu ảnh vào DB
         const newImage = await Image.create({ url: req.file.path });
 
+        console.log(newImage.url)
         // Trả về phản hồi thành công
-        return res.status(200).json({
-            statusCode: 200,
+        return res.status(201).json({
+            statusCode: 201,
             message: 'File uploaded successfully',
             url: newImage.url
         });
