@@ -8,7 +8,7 @@ const productController = {
         const { value, error } = baseProductValidator.validate(req.body, { abortEarly: false, convert: false })
         if (error) {
             const errors = error.details.map(err => {
-                return { statusCode: 400, message: err.message, field: err.context.label }
+                return { message: err.message, field: err.context.label }
             })
             return res.status(400).json({ statusCode: 400, success: false, error: errors })
         }

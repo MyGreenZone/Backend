@@ -11,7 +11,8 @@ const MODEL_NAMES = Object.freeze({
     CATEGORY: 'Category',
     PRODUCT: 'Product',
     VARIANT: 'Variant',
-    TOPPING: 'Topping'
+    TOPPING: 'Topping',
+    VOUCHER: 'Voucher'
    
 })
 

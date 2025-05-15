@@ -213,8 +213,6 @@ const productService = {
             }
         };
     }
-
-
 }
 
 
