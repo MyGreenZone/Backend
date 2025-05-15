@@ -59,8 +59,22 @@ const productController = {
         }
     },
 
+    async getLatestProducts(req, res) {
+
+        const limit = parseInt(req.query.limit) || 10;
+        const page = parseInt(req.query.page) || 1;
+
+        try {
+            const result = await productService.getLatestProducts(limit, page);
+            res.status(result.statusCode).json(result);
+        } catch (error) {
+            res.status(500).json({ statusCode: 500, success: false, message: error.message });
+        }
+    },
+
     async patchProduct(req, res) {
         const { productId } = req.params
+
         if (!mongoose.Types.ObjectId.isValid(productId)) {
             return res.status(400).json({ statusCode: 400, success: false, message: 'Sai định dạng productId' })
         }

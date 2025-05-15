@@ -137,6 +137,52 @@ const productService = {
         return { statusCode: 200, success: true, message: 'Get all product successfully', data: data }
     },
 
+    async getLatestProducts(limit = 10, page = 1) {
+
+        const skip = (page - 1) * limit;
+        const totalDocs = await Product.countDocuments();
+        const totalPages = Math.ceil(totalDocs / limit);
+
+        const latestProducts = await Product.find()
+            .sort({ createdAt: 'descending' })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
+        // Lấy categories tương ứng từng sản phẩm
+        const data = await Promise.all(
+            latestProducts.map(async (product) => {
+                const categories = await Category.find({ _id: { $in: product.categoryIds || [] } }).lean();
+
+                return {
+                    _id: product._id,
+                    name: product.name,
+                    description: product.description,
+                    image: product.image,
+                    sellingPrice: product.sellingPrice,
+                    createdAt: product.createdAt,
+                    updatedAt: product.updatedAt,
+                    categories,
+                };
+            })
+        );
+
+    
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Get latest product successfully',
+            data: {
+                page,
+                limit,
+                totalDocs,
+                totalPages,
+                docs: data,
+            },
+        };
+    },
+
+
     async patchProduct(productId, data) {
         if (!mongoose.Types.ObjectId.isValid(productId)) {
             return { statusCode: 400, success: false, message: 'Sai định dạng productId' }

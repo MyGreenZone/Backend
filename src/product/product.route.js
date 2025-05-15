@@ -189,6 +189,97 @@ productRouter.post('/create', productController.createProduct)
  */
 productRouter.get('/all', productController.getAllProducts);
 
+/**
+ * @swagger
+ * /v1/product/latest:
+ *   get:
+ *     summary: Get latest products with pagination
+ *     description: Retrieve the latest products, supports limit and page query parameters for pagination.
+ *     tags:
+ *       - Product
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *           minimum: 1
+ *         description: Number of products per page
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *           minimum: 1
+ *         description: Page number for pagination
+ *     responses:
+ *       200:
+ *         description: Successful retrieval of latest products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     totalDocs:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *                     docs:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           name:
+ *                             type: string
+ *                           description:
+ *                             type: string
+ *                           image:
+ *                             type: string
+ *                           sellingPrice:
+ *                             type: number
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                           categories:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *       400:
+ *         description: Invalid parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 400
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid product ID"
+ */
+productRouter.get('/latest', productController.getLatestProducts);
 
 
 
@@ -341,6 +432,10 @@ productRouter.get('/:productId', productController.getProductDetail)
  *         description: Lỗi server
  */
 productRouter.patch('/:productId', productController.patchProduct);
+
+
+
+
 
 
 
