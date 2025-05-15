@@ -271,7 +271,77 @@ productRouter.get('/:productId', productController.getProductDetail)
 
 
 
-productRouter.patch('/patch/:productId', productController.patchProduct)
+/**
+ * @swagger
+ * /v1/product/{productId}:
+ *   patch:
+ *     summary: Cập nhật thông tin sản phẩm
+ *     tags:
+ *       - Product
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của sản phẩm cần cập nhật
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 example: admin123
+ *               name:
+ *                 type: string
+ *                 example: Trà sữa truyền thống
+ *               description:
+ *                 type: string
+ *                 example: Thức uống quen thuộc với vị trà đậm và sữa béo
+ *               image:
+ *                 type: string
+ *                 format: uri
+ *                 example: https://example.com/image.jpg
+ *               sellingPrice:
+ *                 type: number
+ *                 example: 25000
+ *               categoryIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   example: "64e47870d8b83477f52c7c10"
+ *               toppingIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   example: "64e47870d8b83477f52c7c12"
+ *     responses:
+ *       200:
+ *         description: Cập nhật sản phẩm thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Dữ liệu không hợp lệ
+ *       401:
+ *         description: Sai mật khẩu quản trị viên
+ *       404:
+ *         description: Không tìm thấy sản phẩm
+ *       500:
+ *         description: Lỗi server
+ */
+productRouter.patch('/:productId', productController.patchProduct);
+
 
 
 

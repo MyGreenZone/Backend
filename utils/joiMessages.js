@@ -1,3 +1,5 @@
+const { boolean } = require("joi");
+
 // utils/joiMessages.js
 const joiMessages = {
     
@@ -23,6 +25,9 @@ const joiMessages = {
     },
     array: {
       base: '{#label} phải là mảng'
+    },
+    boolean: {
+      base: '{#label} phải là là giá trị boolean'
     }
   };
   

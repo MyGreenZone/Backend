@@ -21,7 +21,7 @@ const createEmployee = async (req, res) => {
         }
 
         if (password !== KEY.ADMIN_PASSWORD) {
-            return res.status(400).json({ statusCode: 400, success: false, message: 'Wrong password' });
+            return res.status(401).json({ statusCode: 401, success: false, message: 'Wrong password' });
         }
         if (!mongoose.Types.ObjectId.isValid(workingStore)) {
             return res.status(400).json({ statusCode: 400, success: false, message: 'Sai định dạng working store' });
@@ -99,7 +99,7 @@ const updateEmployee = async (req, res) => {
         }
 
         if (password !== KEY.ADMIN_PASSWORD) {
-            return res.status(400).json({ statusCode: 400, success: false, message: 'Wrong password' });
+            return res.status(401).json({ statusCode: 401, success: false, message: 'Wrong password' });
         }
         // Kiểm tra lastName không được bỏ trống
         if (lastName === undefined || lastName.trim() === '') {

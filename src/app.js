@@ -17,6 +17,9 @@ require("./image/image.schema")
 require("./employee/employee.schema")
 require("./category/category.schema")
 require("./topping/topping.schema")
+require("./product/product.schema")
+require("./variant/variant.schema")
+
 
 const authRouter = require('./auth/auth.route');
 const storeRouter = require('./store/store.route');
@@ -25,6 +28,7 @@ const employeeRouter = require('./employee/employee.route');
 const categoryRouter = require('./category/category.route');
 const toppingRouter = require('./topping/topping.route');
 const productRouter = require('./product/product.route');
+const variantRouter = require('./variant/variant.route');
 
 // https://restapirepo.onrender.com/
 mongoose.connect("mongodb://localhost:27017/MyGreenZone")
@@ -48,6 +52,7 @@ app.use('/v1/employee', employeeRouter);
 app.use('/v1/category', categoryRouter);
 app.use('/v1/topping', toppingRouter);
 app.use('/v1/product', productRouter);
+app.use('/v1/variant', variantRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

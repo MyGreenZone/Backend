@@ -16,7 +16,36 @@ const variantService = {
             message: 'Created variants successfully',
             data: newVariants
         }
+    },
+
+    async patchVariant(variantId, data) {
+        const patchedVariant = await Variant.findByIdAndUpdate(
+            variantId,
+            data,
+            { new: true, runValidators: true, timestamps: true }
+        )
+
+        if (!patchedVariant) {
+            return { statusCode: 404, success: false, message: 'Variant not found' }
+        }
+        return { statusCode: 200, success: true, message: 'Patched variant successfully', data: patchedVariant }
+    },
+
+    async getVariantDetail(variantId) {
+        const detail = await Variant.findById(variantId).lean().populate('productId')
+        
+        if (!detail) {
+            return { statusCode: 404, success: false, message: 'Variant not found' }
+        }
+        const data = { ...detail, product: detail.productId }
+        delete(data.productId)
+        return { statusCode: 200, success: true, message: 'Get variant detail successfully', data }
+    },
+
+    async getLastestProducts(){
+
     }
+
 
 }
 module.exports = variantService

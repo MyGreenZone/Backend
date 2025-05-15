@@ -12,7 +12,7 @@ const createStore = async (req, res) => {
         }
 
         if (password !== KEY.ADMIN_PASSWORD) {
-            return res.status(400).json({ statusCode: 400, success: false, message: 'Wrong password' });
+            return res.status(401).json({ statusCode: 401, success: false, message: 'Wrong password' });
         }
 
 
@@ -122,7 +122,7 @@ const updateStore = async (req, res) => {
         }
 
         if (password !== KEY.ADMIN_PASSWORD) {
-            return res.status(400).json({ statusCode: 400, success: false, message: 'Wrong password' });
+            return res.status(401).json({ statusCode: 401, success: false, message: 'Wrong password' });
         }
 
         if (!mongoose.Types.ObjectId.isValid(storeId)) {
