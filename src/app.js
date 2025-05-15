@@ -20,6 +20,7 @@ require("./topping/topping.schema")
 require("./product/product.schema")
 require("./variant/variant.schema")
 require("./voucher/voucher.schema")
+require("./order/order.schema")
 
 
 const authRouter = require('./auth/auth.route');
@@ -31,6 +32,7 @@ const toppingRouter = require('./topping/topping.route');
 const productRouter = require('./product/product.route');
 const variantRouter = require('./variant/variant.route');
 const voucherRouter = require('./voucher/voucher.route');
+const orderRouter = require('./order/order.route');
 
 // https://restapirepo.onrender.com/
 mongoose.connect("mongodb://localhost:27017/MyGreenZone")
@@ -56,6 +58,7 @@ app.use('/v1/topping', toppingRouter);
 app.use('/v1/product', productRouter);
 app.use('/v1/variant', variantRouter);
 app.use('/v1/voucher', voucherRouter);
+app.use('/v1/order', orderRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
