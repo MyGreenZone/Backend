@@ -51,7 +51,7 @@ const productService = {
         let variants = [];
         if (!data.sizes || data.sizes.length === 0) {
             const defaultVariant = await variantService.createVariant(productId, {
-                sellingPrice: data.defaultSellingPrice || 10000
+                sellingPrice: data.sellingPrice || 10000
             });
             variants = [defaultVariant.data];
         } else {
@@ -135,7 +135,40 @@ const productService = {
         )
 
         return { statusCode: 200, success: true, message: 'Get all product successfully', data: data }
+    },
+
+    async patchProduct(productId, data) {
+        if (!mongoose.Types.ObjectId.isValid(productId)) {
+            return { statusCode: 400, success: false, message: 'Sai định dạng productId' }
+        }
+
+        const updatedProduct = await Product.findByIdAndUpdate(productId, data, { new: true, runValidators: true }).lean()
+        if (!updatedProduct) {
+            return { statusCode: 404, success: false, message: 'Product not found' }
+        }
+
+        const toppings = await Topping.find({ _id: { $in: updatedProduct.toppingIds || [] } });
+        const variants = await Variant.find({ productId });
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Updated product successfully',
+            data: {
+                _id: updatedProduct._id,
+                name: updatedProduct.name,
+                description: updatedProduct.description,
+                image: updatedProduct.image,
+                sellingPrice: updatedProduct.sellingPrice,
+                createdAt: updatedProduct.createdAt,
+                updatedAt: updatedProduct.updatedAt,
+                variant: variants,
+                topping: toppings
+            }
+        };
     }
+
+
 }
 
 

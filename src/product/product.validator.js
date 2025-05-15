@@ -3,7 +3,7 @@ const Joi = require('joi')
 const { KEY } = require('../../constants')
 const joiMessages = require('../../utils/joiMessages')
 
-const productValidator = Joi.object({
+const baseProductValidator = Joi.object({
     password: Joi.string()
         .trim()
         .required()
@@ -13,11 +13,6 @@ const productValidator = Joi.object({
             'any.only': joiMessages.any.only,
             'string.empty': joiMessages.string.empty
         }),
-    defaultSellingPrice: Joi.number().min(1000).messages({
-        'any.required': joiMessages.any.required,
-        'number.min': joiMessages.number.min
-    }),
-
     name: Joi.string().trim().required().min(1).max(100).messages({
         'any.required': joiMessages.any.required,
         'string.empty': joiMessages.string.empty
@@ -29,6 +24,10 @@ const productValidator = Joi.object({
     image: Joi.string().uri().trim().required().min(1).max(500).messages({
         'any.required': joiMessages.any.required,
         'string.empty': joiMessages.string.empty
+    }),
+    sellingPrice: Joi.number().min(1000).messages({
+        'any.required': joiMessages.any.required,
+        'number.min': joiMessages.number.min
     }),
     sizes: Joi.array().items(
         Joi.object({
@@ -66,4 +65,12 @@ const productValidator = Joi.object({
     })
 })
 
-module.exports = productValidator
+
+const patchProductValidator = baseProductValidator.fork(
+    ['name', 'description', 'image', 'sellingPrice', 'categoryIds', 'toppingIds'],
+    (schema) => schema.optional()
+)
+
+
+
+module.exports = { baseProductValidator, patchProductValidator }

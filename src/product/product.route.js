@@ -27,7 +27,7 @@ const productRouter = express.Router()
  *                 type: string
  *               image:
  *                 type: string
- *               defaultSellingPrice:
+ *               sellingPrice:
  *                 type: number
  *               sizes:
  *                 type: array
@@ -46,7 +46,7 @@ const productRouter = express.Router()
  *               password: admin123
  *               name: "Trà sữa thái xanh"
  *               description: "Ngon và mát"
- *               defaultSellingPrice: 10000
+ *               sellingPrice: 10000
  *               sizes:
  *                 - size: "M"
  *                   sellingPrice: 12000
@@ -267,6 +267,11 @@ productRouter.get('/all', productController.getAllProducts);
  *         description: Lỗi server
  */
 productRouter.get('/:productId', productController.getProductDetail)
+
+
+
+
+productRouter.patch('/patch/:productId', productController.patchProduct)
 
 
 
