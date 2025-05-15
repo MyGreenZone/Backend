@@ -60,6 +60,9 @@ const voucherRouter = express.Router()
  *                 type: string
  *                 format: date-time
  *                 example: 2025-12-01T00:00:00.000Z
+ *               status:
+ *                 type: string
+ *                 example: active
  *     responses:
  *       201:
  *         description: Tạo voucher thành công
