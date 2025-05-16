@@ -1,17 +1,17 @@
 // order.schema.js
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
-const { MODEL_NAMES, DeliveryMethod, OrderStatus } = require('../../constants');
+const { MODEL_NAMES, DeliveryMethod, OrderStatus, PaymentMethod } = require('../../constants');
 
 
 const orderSchema = new Schema({
     deliveryMethod: { type: String, enum: DeliveryMethod.getValues(), required: true },
     fulfillmentDateTime: { type: Date, required: true },
-    status: { type: String, enum: OrderStatus.getValues(), required: true },
+    status: { type: String, enum: OrderStatus.getValues(), required: true, default: OrderStatus.AWAITING_PAYMENT.value },
     note: { type: String },
-    totalPrice: { type: Number, required: true, default: 0 },
+    totalPrice: { type: Number, required: true, default: 0, min: 0 },
     shippingFee: { type: Number, required: true, default: 0 },
-    paymentMethod: { type: String, enum: ['online', 'cod'], required: true },
+    paymentMethod: { type: String, enum: PaymentMethod.getValues(), required: true },
     consigneeName: { type: String },
     consigneePhone: { type: String },
     shippingAddress: { type: String },
@@ -35,13 +35,13 @@ const orderSchema = new Schema({
 
     orderItems: [{
         variant: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.VARIANT, required: true },
-        quantity: { type: Number, required: true, default: 1 },
-        price: { type: Number, required: true, default: 1000 },
+        quantity: { type: Number, required: true, default: 1, min: 1 },
+        price: { type: Number, required: true, default: 1000, min: 0 },
         toppingItems: [
             {
                 topping: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.TOPPING, required: true },
-                quantity: { type: Number, required: true, default: 1 },
-                price: { type: Number, required: true, default: 1000 },
+                quantity: { type: Number, required: true, default: 1, min: 1 },
+                price: { type: Number, required: true, default: 1000, min: 0 },
             }
         ]
     }],

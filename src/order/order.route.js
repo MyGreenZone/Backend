@@ -5,4 +5,7 @@ const orderRouter = express.Router()
 
 
 orderRouter.post('/create', orderController.createOrder)
+orderRouter.get('/:orderId', orderController.getOrderDetail)
+
+
 module.exports = orderRouter

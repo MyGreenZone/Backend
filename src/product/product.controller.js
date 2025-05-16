@@ -21,7 +21,7 @@ const productController = {
             return res.status(500).json({
                 statusCode: 500,
                 success: false,
-                message: 'Lỗi khi tạo product',
+                message: 'Error creating product:',
             });
         }
     },

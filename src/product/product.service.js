@@ -80,7 +80,7 @@ const productService = {
 
     async getProductDetail(productId) {
         if (!mongoose.Types.ObjectId.isValid(productId)) {
-            return { statusCode: 400, success: false, message: 'Invalid product ID' };
+            return { statusCode: 400, success: false, message: 'Invalid productId' };
         }
 
         const product = await Product.findById(productId);
