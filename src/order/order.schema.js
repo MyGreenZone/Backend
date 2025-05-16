@@ -1,20 +1,38 @@
 // order.schema.js
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
-const { MODEL_NAMES } = require('../../constants');
-const { required } = require('joi');
+const { MODEL_NAMES, DeliveryMethod, OrderStatus } = require('../../constants');
+
 
 const orderSchema = new Schema({
-    deliveryMethod: { type: String, enum: ['pickup', 'delivery'], required: true },
+    deliveryMethod: { type: String, enum: DeliveryMethod.getValues(), required: true },
     fulfillmentDateTime: { type: Date, required: true },
+    status: { type: String, enum: OrderStatus.getValues(), required: true },
+    note: { type: String },
     totalPrice: { type: Number, required: true, default: 0 },
+    shippingFee: { type: Number, required: true, default: 0 },
     paymentMethod: { type: String, enum: ['online', 'cod'], required: true },
     consigneeName: { type: String },
     consigneePhone: { type: String },
     shippingAddress: { type: String },
+
+    cancelReason: { type: String },
+
+    latitude: { type: String },
+    longitude: { type: String },
+
+    pendingConfirmationAt: { type: Date },
+    readyForPickupAt: { type: Date },
+    shippingOrderAt: { type: Date },
+    completedAt: { type: Date },
+    cancelledAt: { type: Date },
+
+    owner: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.USER },
+    shipper: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.EMPLOYEE },
+    creator: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.EMPLOYEE },
     store: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.STORE, required: true },
-    owner: { type: String },
     voucher: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.VOUCHER },
+
     orderItems: [{
         variant: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.VARIANT, required: true },
         quantity: { type: Number, required: true, default: 1 },
@@ -27,8 +45,7 @@ const orderSchema = new Schema({
             }
         ]
     }],
-    latitude: { type: String },
-    longitude: { type: String }
+
 }, { timestamps: true });
 
 const Order = mongoose.models.Order || mongoose.model(MODEL_NAMES.ORDER, orderSchema)

@@ -53,11 +53,14 @@ const voucherValidator = Joi.object({
         'any.required': joiMessages.any.required,
         'date.greater': 'endDate phải sau startDate'
     }),
-    status: Joi.valid('active', 'inactive').required().messages({
-        'any.required': joiMessages.any.required,
-        'any.only': 'voucherType chỉ được phép là một trong các giá trị: active, inactive',
-        'string.empty': joiMessages.string.empty
-    }),
+
+    status: Joi.valid('active', 'inactive')
+        .required()
+        .messages({
+            'any.required': joiMessages.any.required,
+            'any.only': 'voucherType chỉ được phép là một trong các giá trị: active, inactive',
+            'string.empty': joiMessages.string.empty
+        }),
 
 })
 
