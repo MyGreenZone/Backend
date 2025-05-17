@@ -33,7 +33,83 @@ const orderService = {
 
         const { owner, voucher, shipper, creator, store, orderItems } = orderDetail
 
-        console.log('orderItems[0]', JSON.stringify(orderItems[0], null, 2))
+
+        if (orderItems.length > 0) {
+
+            const orderItemsData = await Promise.all(
+                orderItems.map(async orderItem => {
+           
+                    const variant = await Variant.findById(orderItem.variant).lean()
+                    if (!variant) return {
+                        product: null,
+                        quantity: orderItem.quantity,
+                        price: orderItem.price,
+                        toppingItems: orderItem.toppingItems
+                    }
+                    // console.log('variant detail', JSON.stringify(variant, null, 2))
+
+                    const product = await Product.findById(variant.productId)
+                    if (!product) return {
+                        product: null,
+                        quantity: orderItem.quantity,
+                        price: orderItem.price,
+                        toppingItems: orderItem.toppingItems
+                    }
+                    // console.log('product detail', JSON.stringify(product, null, 2))
+
+
+                    if (orderItem.toppingItems.length > 0) {
+                        // console.log(orderItem.toppingItems)
+                        const toppingItems = await Promise.all(
+                            orderItem.toppingItems.map(async topping => {
+                                const toppingDetail = await Topping.findById(topping.topping)
+                                if (toppingDetail) {
+                                    return {
+                                        _id: toppingDetail._id,
+                                        name: toppingDetail.name,
+                                        extraPrice: toppingDetail.extraPrice,
+                                        quantity: topping.quantity,
+                                        price: topping.price
+                                    }
+                                }
+                            })
+                        )
+                        // console.log('toppingItems', toppingItems)
+                        return {
+                            product: {
+                                _id: product._id,
+                                name: product.name,
+                                size: product.size,
+                                image: product.image,
+                                sellingPrice: product.sellingPrice
+                            },
+                            quantity: orderItem.quantity,
+                            price: orderItem.price,
+                            toppingItems: toppingItems
+                        }
+
+                    }
+
+                    return {
+                        product: {
+                            _id: product._id,
+                            name: product.name,
+                            size: product.size,
+                            image: product.image,
+                            sellingPrice: product.sellingPrice
+                        },
+                        quantity: orderItem.quantity,
+                        price: orderItem.price,
+                        toppingItems: []
+                    }
+                })
+            )
+
+            orderDetail.orderItems = orderItemsData
+
+        }
+
+
         if (shipper) {
             const shipperDetail = await Employee.findById(shipper).lean()
             if (shipperDetail) {
