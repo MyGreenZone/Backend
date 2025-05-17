@@ -29,7 +29,7 @@ const orderSchema = new Schema({
 
     owner: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.USER, default: null },
     shipper: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.EMPLOYEE, default: null },
-    creator: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.EMPLOYEE , default: null},
+    creator: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.EMPLOYEE, default: null },
     store: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.STORE, required: true },
     voucher: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.VOUCHER, default: null },
 

@@ -19,4 +19,17 @@ const authenticateJWT = (req, res, next) => {
   });
 };
 
-module.exports = authenticateJWT;
+
+const verifyToken = (req, res, next) => {
+  const token = req.header('Authorization')?.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, config.SECRETKEY)
+    console.log('decoded', decoded)
+    req.user = decoded
+    next()
+  } catch (error) {
+    return res.status(401).json({ statusCode: 401, success: false, message: 'Token không hợp lệ hoặc hết hạn' });
+  }
+}
+
+module.exports = { authenticateJWT, verifyToken };

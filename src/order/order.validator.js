@@ -40,6 +40,14 @@ const createOrderValidator = Joi.object({
       'string.empty': joiMessages.string.empty,
       'string.base': joiMessages.string.base
     }),
+  owner: Joi.string()
+    .pattern(KEY.OBJECT_ID_PATTERN)
+    .optional()
+    .messages({
+      'any.required': joiMessages.any.required,
+      'string.empty': joiMessages.string.empty,
+      'string.base': joiMessages.string.base
+    }),
 
   consigneeName: Joi.string()
     .when('deliveryMethod', {

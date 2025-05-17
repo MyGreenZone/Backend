@@ -4,10 +4,10 @@ const { MODEL_NAMES } = require("../../constants");
 
 const Schema = mongoose.Schema
 const userSchema = new Schema({
-  phoneNumber: { type: String },
-  email: { type: String },
-  gender: { type: String },
-  avatar: { type: String },
+  phoneNumber: { type: String, default: null },
+  email: { type: String, default: null },
+  gender: { type: String, default: null },
+  avatar: { type: String, default: null },
   verifyPhoneNumber: { type: Boolean, default: false },
   verifyMail: { type: Boolean, default: false },
   seed: { type: Number, default: 0 }, // <== Thêm default
@@ -18,8 +18,8 @@ const userSchema = new Schema({
       return `G${random}`;
     }
   },
-  firstName: { type: String },
-  lastName: { type: String },
+  firstName: { type: String, default: null },
+  lastName: { type: String, default: 'Khách vãng lai' },
   roles: [{ type: Schema.Types.ObjectId, ref: MODEL_NAMES.ROLE }]
 });
 

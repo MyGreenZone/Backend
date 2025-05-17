@@ -12,8 +12,11 @@ const orderController = {
             return res.status(400).json({ statusCode: 400, success: false, error: errors })
         }
 
+
+
         try {
-            const result = await orderService.createOrder(value);
+            const phoneNumber = req.user.phoneNumber
+            const result = await orderService.createOrder(phoneNumber, value);
             return res.status(result.statusCode).json(result);
         } catch (error) {
             console.log("Error creating order:", error);
@@ -25,12 +28,24 @@ const orderController = {
         }
     },
 
+    async getMyOrders(req, res) {
+        try {
+            const phoneNumber = req.user.phoneNumber
+
+            const { status } = req.query
+            const result = await orderService.getMyOrders(phoneNumber, status)
+            return res.status(result.statusCode).json(result)
+        } catch (error) {
+            return res.status(500).json({ success: false, message: 'Internal server error. Path: /v1/order/my-orders ' })
+        }
+    },
+
     async getOrderDetail(req, res) {
         const { orderId } = req.params
         if (!orderId) {
             return res.status(400).json({ statusCode: 400, success: false, message: 'Missing productId' })
         }
-        
+
         try {
             const result = await orderService.getOrderDetail(orderId);
             return res.status(result.statusCode).json(result);

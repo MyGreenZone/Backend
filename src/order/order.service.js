@@ -10,13 +10,25 @@ const Topping = require('../topping/topping.schema')
 const Voucher = require('../voucher/voucher.schema')
 
 const orderService = {
-    async createOrder(data) {
-        const newOrder = await Order.create(data)
+    async createOrder(phoneNumber, data) {
+        const user = await User.findOne({ phoneNumber })
+      
+        let newOrder = null 
+        if (user.roles[0] === '681c8c3c5ef65cec792c1056') {// customer create order
+            newOrder = await Order.create({ ...data, owner: user._id })
+        }else{ // merchant create order
+            const newGuest = await User.create()
+            newOrder = await Order.create({ ...data, owner: newGuest._id })
+        }
+
         return { statusCode: 201, success: true, message: 'Created order successfully', data: newOrder }
     },
 
-    async getMyOrders(userId, status) {
-        const myOrders = await Order.find({ status, owner: userId })
+    async getMyOrders(phoneNumber, status) {
+        const user = await User.findOne({ phoneNumber })
+        if (!user) return { statusCode: 404, success: false, message: 'User not found' }
+
+        const myOrders = await Order.find({ status, owner: user._id })
         return { statusCode: 200, success: true, message: 'Get my orders successfully', data: myOrders }
     },
 
@@ -93,6 +105,8 @@ const orderService = {
             toppingItems: toppingItems || []
         }
     },
+
+
 
     fallbackOrderItem(orderItem) {
         return {
