@@ -1,5 +1,5 @@
-const Order = require('./order.schema')
 const mongoose = require('mongoose')
+const Order = require('./order.schema')
 const Store = require('../store/store.schema')
 const Employee = require('../employee/employee.schema')
 const User = require('../auth/user.schema')
@@ -25,165 +25,141 @@ const orderService = {
             return { statusCode: 400, success: false, message: 'Invalid orderId' };
         }
 
+        const order = await Order.findById(orderId).lean()
 
-        const orderDetail = await Order.findById(orderId).lean()
-        if (!orderDetail) {
+        if (!order) {
             return { statusCode: 404, success: false, message: 'Order not found', data: null }
         }
 
-        const { owner, voucher, shipper, creator, store, orderItems } = orderDetail
+        // clone order
+        const responseData = { ...order }
 
 
-        if (orderItems.length > 0) {
+        responseData.shipper = await this.getUserInfo(Employee, String(order.shipper))
+        responseData.owner = await this.getUserInfo(User, String(order.owner))
+        responseData.creator = await this.getUserInfo(Employee, String(order.creator))
 
-            const orderItemsData = await Promise.all(
-                orderItems.map(async orderItem => {
-           
-                    const variant = await Variant.findById(orderItem.variant).lean()
-                    if (!variant) return {
-                        product: null,
-                        quantity: orderItem.quantity,
-                        price: orderItem.price,
-                        toppingItems: orderItem.toppingItems
-                    }
-                    // console.log('variant detail', JSON.stringify(variant, null, 2))
+        responseData.voucher = await this.getVoucherInfo(Voucher, String(order.voucher))
 
-                    const product = await Product.findById(variant.productId)
-                    if (!product) return {
-                        product: null,
-                        quantity: orderItem.quantity,
-                        price: orderItem.price,
-                        toppingItems: orderItem.toppingItems
-                    }
-                    // console.log('product detail', JSON.stringify(product, null, 2))
+        responseData.store = await this.getStoreInfo(Store, String(order.store))
 
+        responseData.orderItems = await Promise.all(
+            (order.orderItems || []).map(async orderItem => {
+                return await this.getOrderItemInfo(orderItem)
+            })
+        )
 
-                    if (orderItem.toppingItems.length > 0) {
-                        // console.log(orderItem.toppingItems)
-                        const toppingItems = await Promise.all(
-                            orderItem.toppingItems.map(async topping => {
-                                const toppingDetail = await Topping.findById(topping.topping)
-                                if (toppingDetail) {
-                                    return {
-                                        _id: toppingDetail._id,
-                                        name: toppingDetail.name,
-                                        extraPrice: toppingDetail.extraPrice,
-                                        quantity: topping.quantity,
-                                        price: topping.price
-                                    }
-                                }
-                            })
-                        )
-                        // console.log('toppingItems', toppingItems)
-                        return {
-                            product: {
-                                _id: product._id,
-                                name: product.name,
-                                size: product.size,
-                                image: product.image,
-                                sellingPrice: product.sellingPrice
-                            },
-                            quantity: orderItem.quantity,
-                            price: orderItem.price,
-                            toppingItems: toppingItems
-                        }
+        return { statusCode: 200, success: true, message: 'Get order detail successfully', data: responseData }
+    },
 
-                    }
+    async getOrderItemInfo(orderItem) {
+        if (!mongoose.Types.ObjectId.isValid(orderItem.variant)) {
+            return this.fallbackOrderItem(orderItem)
+        }
+        const variant = await Variant.findById(orderItem.variant).lean()
+        if (!variant) return this.fallbackOrderItem(orderItem)
 
+        if (!mongoose.Types.ObjectId.isValid(variant.productId)) {
+            return this.fallbackOrderItem(orderItem)
+        }
+        const product = await Product.findById(variant.productId)
+        if (!product) return this.fallbackOrderItem(orderItem)
+
+        const toppingItems = await Promise.all(
+            orderItem.toppingItems.map(async topping => {
+                const toppingDetail = await Topping.findById(topping.topping)
+                if (toppingDetail) {
                     return {
-                        product: {
-                            _id: product._id,
-                            name: product.name,
-                            size: product.size,
-                            image: product.image,
-                            sellingPrice: product.sellingPrice
-                        },
-                        quantity: orderItem.quantity,
-                        price: orderItem.price,
-                        toppingItems: []
+                        _id: toppingDetail._id,
+                        name: toppingDetail.name,
+                        extraPrice: toppingDetail.extraPrice,
+                        quantity: topping.quantity,
+                        price: topping.price
                     }
-                })
-            )
-
-            orderDetail.orderItems = orderItemsData
-
+                }
+                return null
+            })
+        )
+        return {
+            product: {
+                _id: product._id,
+                name: product.name,
+                size: product.size,
+                image: product.image,
+                sellingPrice: product.sellingPrice
+            },
+            quantity: orderItem.quantity,
+            price: orderItem.price,
+            toppingItems: toppingItems || []
         }
+    },
+
+    fallbackOrderItem(orderItem) {
+        return {
+            product: null,
+            quantity: orderItem.quantity,
+            price: orderItem.price,
+            toppingItems: orderItem.toppingItems || []
+        }
+    },
 
 
-        if (shipper) {
-            const shipperDetail = await Employee.findById(shipper).lean()
-            if (shipperDetail) {
-                // console.log('shipperDetail', JSON.stringify(shipperDetail, null, 2))
-                orderDetail.creator = {
-                    phoneNumber: shipperDetail.phoneNumber,
-                    firstName: shipperDetail.firstName,
-                    lastName: shipperDetail.lastName,
-                    avatar: shipperDetail.avatar || null
+    async getStoreInfo(Model, id) {
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            const storeInfo = await Model.findById(id).lean()
+            if (storeInfo) {
+                // console.log('storeInfo', JSON.stringify(storeInfo, null, 2))
+                return {
+                    name: storeInfo.name,
+                    phoneNumber: storeInfo.phoneNumber,
+                    address: storeInfo.address,
+                    latitude: storeInfo.latitude,
+                    longitude: storeInfo.longitude
                 }
             }
+            return null
         }
+        return null
+    },
 
-        if (owner) {
-            const ownerDetail = await User.findById(owner).lean()
-            if (ownerDetail) {
-                // console.log('ownerDetail', JSON.stringify(ownerDetail, null, 2))
-                orderDetail.owner = {
-                    phoneNumber: ownerDetail.phoneNumber,
-                    firstName: ownerDetail.firstName,
-                    lastName: ownerDetail.lastName,
-                    avatar: ownerDetail.avatar || null
+
+    async getVoucherInfo(Model, id) {
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            const voucherInfo = await Model.findById(id).lean()
+            if (voucherInfo) {
+                // console.log('voucherInfo', JSON.stringify(voucherInfo, null, 2))
+                return {
+                    name: voucherInfo.name,
+                    code: voucherInfo.code,
+                    voucherType: voucherInfo.voucherType,
+                    discountType: voucherInfo.discountType,
+                    value: voucherInfo.value
                 }
             }
+            return null
 
         }
+        return null
+    },
 
-
-        if (voucher) {
-            const voucherDetail = await Voucher.findById(voucher).lean()
-            if (voucherDetail) {
-                // console.log('voucherDetail', JSON.stringify(voucherDetail, null, 2))
-                orderDetail.voucher = {
-                    name: voucherDetail.name,
-                    code: voucherDetail.code,
-                    voucherType: voucherDetail.voucherType,
-                    discountType: voucherDetail.discountType,
-                    value: voucherDetail.value
+    async getUserInfo(Model, id) {
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            const userInfo = await Model.findById(id).lean()
+            if (userInfo) {
+                // console.log('userInfo', JSON.stringify(userInfo, null, 2))
+                return {
+                    phoneNumber: userInfo.phoneNumber,
+                    firstName: userInfo.firstName,
+                    lastName: userInfo.lastName,
+                    avatar: userInfo.avatar || null
                 }
             }
-
+            return null
         }
-
-        if (store) {
-            const storeDetail = await Store.findById(store).lean()
-            if (storeDetail) {
-                // console.log('storeDetail', JSON.stringify(storeDetail, null, 2))
-                orderDetail.store = {
-                    name: storeDetail.name,
-                    phoneNumber: storeDetail.phoneNumber,
-                    address: storeDetail.address,
-                    latitude: storeDetail.latitude,
-                    longitude: storeDetail.longitude
-                }
-            }
-        }
-
-        if (creator) {
-            const creatorDetail = await Employee.findById(creator).lean()
-            if (creatorDetail) {
-                // console.log('creatorDetail', JSON.stringify(creatorDetail, null, 2))
-                orderDetail.creator = {
-                    phoneNumber: creatorDetail.phoneNumber,
-                    firstName: creatorDetail.firstName,
-                    lastName: creatorDetail.lastName,
-                    avatar: creatorDetail.avatar || null
-                }
-            }
-        }
-
-
-
-        return { statusCode: 200, success: true, message: 'Get order detail successfully', data: orderDetail }
+        return null
     }
+
+
 
 }
 

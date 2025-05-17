@@ -27,11 +27,11 @@ const orderSchema = new Schema({
     completedAt: { type: Date },
     cancelledAt: { type: Date },
 
-    owner: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.USER },
-    shipper: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.EMPLOYEE },
-    creator: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.EMPLOYEE },
+    owner: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.USER, default: null },
+    shipper: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.EMPLOYEE, default: null },
+    creator: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.EMPLOYEE , default: null},
     store: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.STORE, required: true },
-    voucher: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.VOUCHER },
+    voucher: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.VOUCHER, default: null },
 
     orderItems: [{
         variant: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.VARIANT, required: true },
