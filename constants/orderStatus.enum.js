@@ -8,6 +8,21 @@ const OrderStatus = Object.freeze({
     CANCELLED: { label: "Đã hủy", value: "cancelled" },
     FAILED_DELIVERY: { label: "Giao hàng thất bại", value: "failedDelivery" },
 
+    getInProgressValues() {
+        return [
+            this.AWAITING_PAYMENT.value,
+            this.PENDING_CONFIRMATION.value,
+            this.PROCESSING.value,
+            this.READY_FOR_PICKUP.value,
+            this.SHIPPING_ORDER.value,
+        ]
+    },
+    getCancelledValues() {
+        return [
+            this.CANCELLED.value,
+            this.FAILED_DELIVERY.value
+        ]
+    },
     getValues() {
         return [
             this.AWAITING_PAYMENT.value,

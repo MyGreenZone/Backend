@@ -30,12 +30,13 @@ const orderController = {
 
     async getMyOrders(req, res) {
         try {
-            const phoneNumber = req.user.phoneNumber
+            // const phoneNumber = req.user.phoneNumber
 
             const { status } = req.query
-            const result = await orderService.getMyOrders(phoneNumber, status)
+            const result = await orderService.getMyOrders('0779188717', status)
             return res.status(result.statusCode).json(result)
         } catch (error) {
+            console.log('Error get my orders', error)
             return res.status(500).json({ success: false, message: 'Internal server error. Path: /v1/order/my-orders ' })
         }
     },

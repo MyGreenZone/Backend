@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { OrderStatus } = require('../../constants')
 const Order = require('./order.schema')
 const Store = require('../store/store.schema')
 const Employee = require('../employee/employee.schema')
@@ -12,11 +13,11 @@ const Voucher = require('../voucher/voucher.schema')
 const orderService = {
     async createOrder(phoneNumber, data) {
         const user = await User.findOne({ phoneNumber })
-      
-        let newOrder = null 
+
+        let newOrder = null
         if (user.roles[0] === '681c8c3c5ef65cec792c1056') {// customer create order
             newOrder = await Order.create({ ...data, owner: user._id })
-        }else{ // merchant create order
+        } else { // merchant create order
             const newGuest = await User.create()
             newOrder = await Order.create({ ...data, owner: newGuest._id })
         }
@@ -25,14 +26,32 @@ const orderService = {
     },
 
     async getMyOrders(phoneNumber, status) {
-        const user = await User.findOne({ phoneNumber })
+
+        const user = await User.findOne({ phoneNumber: '0779188717' })
         if (!user) return { statusCode: 404, success: false, message: 'User not found' }
 
-        const myOrders = await Order.find({ status, owner: user._id })
-        return { statusCode: 200, success: true, message: 'Get my orders successfully', data: myOrders }
+        let myOrders = []
+        if (!status) {
+            myOrders = await Order.find({ status: { $in: OrderStatus.getInProgressValues() }, owner: user._id })
+        } else if (status === OrderStatus.COMPLETED.value) {
+            myOrders = await Order.find({ status: OrderStatus.COMPLETED.value, owner: user._id })
+        } else if (status === OrderStatus.CANCELLED.value) {
+            myOrders = await Order.find({ status: { $in: OrderStatus.getCancelledValues() }, owner: user._id })
+        }
+
+       
+       const responseData= await Promise.all(
+            myOrders.map(async order => {
+                const detail = await this.getOrderDetail(order._id, false)
+                console.log('detail', detail)
+                return detail.data
+            })
+        )
+
+        return { statusCode: 200, success: true, message: 'Get my orders successfully', data: responseData }
     },
 
-    async getOrderDetail(orderId) {
+    async getOrderDetail(orderId, enableToppingItem = true) {
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
             return { statusCode: 400, success: false, message: 'Invalid orderId' };
         }
@@ -57,14 +76,14 @@ const orderService = {
 
         responseData.orderItems = await Promise.all(
             (order.orderItems || []).map(async orderItem => {
-                return await this.getOrderItemInfo(orderItem)
+                return await this.getOrderItemInfo(orderItem, enableToppingItem)
             })
         )
 
         return { statusCode: 200, success: true, message: 'Get order detail successfully', data: responseData }
     },
 
-    async getOrderItemInfo(orderItem) {
+    async getOrderItemInfo(orderItem, enableToppingItem = true) {
         if (!mongoose.Types.ObjectId.isValid(orderItem.variant)) {
             return this.fallbackOrderItem(orderItem)
         }
@@ -77,32 +96,37 @@ const orderService = {
         const product = await Product.findById(variant.productId)
         if (!product) return this.fallbackOrderItem(orderItem)
 
-        const toppingItems = await Promise.all(
-            orderItem.toppingItems.map(async topping => {
-                const toppingDetail = await Topping.findById(topping.topping)
-                if (toppingDetail) {
-                    return {
-                        _id: toppingDetail._id,
-                        name: toppingDetail.name,
-                        extraPrice: toppingDetail.extraPrice,
-                        quantity: topping.quantity,
-                        price: topping.price
+        let toppingItems = orderItem.toppingItems
+        if (enableToppingItem) {
+            toppingItems = await Promise.all(
+                orderItem.toppingItems.map(async topping => {
+                    const toppingDetail = await Topping.findById(topping.topping)
+                    if (toppingDetail) {
+                        return {
+                            _id: toppingDetail._id,
+                            name: toppingDetail.name,
+                            extraPrice: toppingDetail.extraPrice,
+                            quantity: topping.quantity,
+                            price: topping.price
+                        }
                     }
-                }
-                return null
-            })
-        )
+                    return null
+                })
+            )
+
+        }
+
         return {
             product: {
-                _id: product._id,
+                _id: variant._id,
                 name: product.name,
-                size: product.size,
+                size: variant.size,
                 image: product.image,
-                sellingPrice: product.sellingPrice
+                sellingPrice: variant.sellingPrice
             },
             quantity: orderItem.quantity,
             price: orderItem.price,
-            toppingItems: toppingItems || []
+            toppingItems: enableToppingItem ? toppingItems : toppingItems.length
         }
     },
 

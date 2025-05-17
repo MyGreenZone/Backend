@@ -123,8 +123,6 @@ orderRouter.post('/create', verifyToken, orderController.createOrder);
  *   get:
  *     summary: Lấy danh sách đơn hàng của người dùng
  *     tags: [Order]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: status
@@ -159,7 +157,7 @@ orderRouter.post('/create', verifyToken, orderController.createOrder);
  *       500:
  *         description: Lỗi server nội bộ
  */
-orderRouter.get('/my-order', verifyToken, orderController.getMyOrders);
+orderRouter.get('/my-order', orderController.getMyOrders);
 
 
 /**
