@@ -75,7 +75,7 @@ const orderService = {
 
 
 
-    async updateOrderStatus(phoneNumber, orderId, status) {
+    async updateOrderStatus(phoneNumber, orderId, newStatus) {
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
             return { statusCode: 400, success: false, message: 'Wrong format orderId' }
         }
@@ -83,25 +83,13 @@ const orderService = {
         const user = await AuthMiddleWare.authorize(phoneNumber)
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
-        // Lấy order hiện tại
-        const existingOrder = await Order.findById(orderId).lean()
-        if (!existingOrder) {
-            return { statusCode: 404, success: false, message: 'Order not found' }
-        }
 
-        const currentOrderStatusPosition = OrderStatus.getPositionByValue(existingOrder.status)
-        const newOrderStatusPosition = OrderStatus.getPositionByValue(status)
-        if (currentOrderStatusPosition >= newOrderStatusPosition) {
-            return {
-                statusCode: 400,
-                success: false,
-                message: `Cannot update order status from ${existingOrder.status.toUpperCase()} to ${status.toUpperCase()}`
-            }
-        }
+        const invalidStatusFlow = await this.validateStatusFlow(orderId, newStatus)
+        if (invalidStatusFlow) return invalidStatusFlow
 
         const patchedOrder = await Order.findByIdAndUpdate(
             orderId,
-            { status },
+            { status: newStatus },
             { new: true, runValidators: true }
         ).lean()
 
@@ -111,6 +99,25 @@ const orderService = {
             return { statusCode: 200, success: true, message: 'Update order successfully', data: enrichOrder }
         }
 
+    },
+
+    async validateStatusFlow(orderId, newStatus) {
+        // Lấy order hiện tại
+        const existingOrder = await Order.findById(orderId).lean()
+        if (!existingOrder) {
+            return { statusCode: 404, success: false, message: 'Order not found' }
+        }
+
+        const currentOrderStatusPosition = OrderStatus.getPositionByValue(existingOrder.status)
+        const newOrderStatusPosition = OrderStatus.getPositionByValue(newStatus)
+        if (currentOrderStatusPosition >= newOrderStatusPosition) {
+            return {
+                statusCode: 400,
+                success: false,
+                message: `Cannot update order status from ${existingOrder.status.toUpperCase()} to ${newStatus.toUpperCase()}`
+            }
+        }
+        return null
     },
 
     async enrichOrder(order, enableToppingItem = true) {
