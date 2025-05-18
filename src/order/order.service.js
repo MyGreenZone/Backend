@@ -60,16 +60,14 @@ const orderService = {
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
             return { statusCode: 400, success: false, message: 'Invalid orderId' };
         }
+        // authen
         const user = await AuthMiddleWare.authorize(phoneNumber)
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
         const order = await Order.findById(orderId).lean()
 
-        if (!order) {
-            return { statusCode: 404, success: false, message: 'Order not found', data: null }
-        }
+        if (!order) return { statusCode: 404, success: false, message: 'Order not found', data: null }
 
-        // clone order
         const enrichOrder = await this.enrichOrder(order, enableToppingItem)
 
         return { statusCode: 200, success: true, message: 'Get order detail successfully', data: enrichOrder }
@@ -85,6 +83,22 @@ const orderService = {
         const user = await AuthMiddleWare.authorize(phoneNumber)
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
+        // Lấy order hiện tại
+        const existingOrder = await Order.findById(orderId).lean()
+        if (!existingOrder) {
+            return { statusCode: 404, success: false, message: 'Order not found' }
+        }
+
+        const currentOrderStatusPosition = OrderStatus.getPositionByValue(existingOrder.status)
+        const newOrderStatusPosition = OrderStatus.getPositionByValue(status)
+        if (currentOrderStatusPosition >= newOrderStatusPosition) {
+            return {
+                statusCode: 400,
+                success: false,
+                message: `Cannot update order status from ${existingOrder.status.toUpperCase()} to ${status.toUpperCase()}`
+            }
+        }
+
         const patchedOrder = await Order.findByIdAndUpdate(
             orderId,
             { status },
@@ -96,7 +110,7 @@ const orderService = {
             const enrichOrder = await this.enrichOrder(patchedOrder, true)
             return { statusCode: 200, success: true, message: 'Update order successfully', data: enrichOrder }
         }
-        return { statusCode: 404, success: false, message: 'Order not found' }
+
     },
 
     async enrichOrder(order, enableToppingItem = true) {

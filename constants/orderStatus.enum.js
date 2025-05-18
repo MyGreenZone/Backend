@@ -1,13 +1,18 @@
 const OrderStatus = Object.freeze({
-    AWAITING_PAYMENT: { label: "Chờ thanh toán", value: "awaitingPayment" },
-    PENDING_CONFIRMATION: { label: "Chờ xác nhận", value: "pendingConfirmation" },
-    PROCESSING: { label: "Đang chuẩn bị", value: "processing" },
-    READY_FOR_PICKUP: { label: "Chờ lấy hàng", value: "readyForPickup" },
-    SHIPPING_ORDER: { label: "Đang giao hàng", value: "shippingOrder" },
-    COMPLETED: { label: "Hoàn thành", value: "completed" },
-    CANCELLED: { label: "Đã hủy", value: "cancelled" },
-    FAILED_DELIVERY: { label: "Giao hàng thất bại", value: "failedDelivery" },
+    AWAITING_PAYMENT: { label: "Chờ thanh toán", value: "awaitingPayment", position: 0 },
+    PENDING_CONFIRMATION: { label: "Chờ xác nhận", value: "pendingConfirmation", position: 1 },
+    PROCESSING: { label: "Đang chuẩn bị", value: "processing", position: 2 },
+    READY_FOR_PICKUP: { label: "Chờ lấy hàng", value: "readyForPickup", position: 3 },
+    SHIPPING_ORDER: { label: "Đang giao hàng", value: "shippingOrder", position: 4 },
+    COMPLETED: { label: "Hoàn thành", value: "completed", position: 5 },
+    CANCELLED: { label: "Đã hủy", value: "cancelled", position: 5 },
+    FAILED_DELIVERY: { label: "Giao hàng thất bại", value: "failedDelivery", position: 5 },
 
+    getPositionByValue(value){
+        const status = this.getValues().find(v => v.position === value)
+        return status ? status.position : 'Position not found'
+    },
+    
     getInProgressValues() {
         return [
             this.AWAITING_PAYMENT.value,
