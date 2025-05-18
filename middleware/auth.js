@@ -2,34 +2,53 @@
 
 const jwt = require('jsonwebtoken');
 const config = require("../configs/envConfig");
-// Middleware kiểm tra JWT
-const authenticateJWT = (req, res, next) => {
-  const token = req.header('Authorization')?.split(' ')[1];  // Lấy token từ header Authorization
+const User = require('../src/auth/user.schema')
 
-  if (!token) {
-    return res.status(401).json({ message: 'No token provided' });
-  }
+const AuthMiddleWare = (() => {
 
-  jwt.verify(token, config.SECRETKEY, (err, user) => {
-    if (err) {
-      return res.status(403).json({ message: 'Invalid token' });
+  const authenticateJWT = (req, res, next) => {
+    const token = req.header('Authorization')?.split(' ')[1];  // Lấy token từ header Authorization
+
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
     }
-    req.user = user;  // Gắn thông tin người dùng vào request để có thể sử dụng ở các bước tiếp theo
-    next();
-  });
-};
+
+    jwt.verify(token, config.SECRETKEY, (err, user) => {
+      if (err) {
+        return res.status(403).json({ message: 'Invalid token' });
+      }
+      req.user = user;  // Gắn thông tin người dùng vào request để có thể sử dụng ở các bước tiếp theo
+      next();
+    });
+  };
 
 
-const verifyToken = (req, res, next) => {
-  const token = req.header('Authorization')?.split(' ')[1];
-  try {
-    const decoded = jwt.verify(token, config.SECRETKEY)
-    console.log('decoded', decoded)
-    req.user = decoded
-    next()
-  } catch (error) {
-    return res.status(401).json({ statusCode: 401, success: false, message: 'Token không hợp lệ hoặc hết hạn' });
+  const verifyToken = (req, res, next) => {
+    const token = req.header('Authorization')?.split(' ')[1];
+    try {
+      const decoded = jwt.verify(token, config.SECRETKEY)
+      console.log('decoded', decoded)
+      req.user = decoded
+      next()
+    } catch (error) {
+      return res.status(401).json({ statusCode: 401, success: false, message: 'Token không hợp lệ hoặc hết hạn' });
+    }
+  };
+
+  const authorize = async (phoneNumber = '0779188717') => {
+    // phoneNumber lấy từ JWT
+    const user = await User.findOne({ phoneNumber })
+    if (!user) return null
+    return user
   }
-}
 
-module.exports = { authenticateJWT, verifyToken };
+  return {
+    authenticateJWT,
+    verifyToken,
+    authorize
+  }
+
+})()
+
+
+module.exports = AuthMiddleWare

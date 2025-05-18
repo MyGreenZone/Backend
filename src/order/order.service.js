@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const { OrderStatus } = require('../../constants')
+const AuthMiddleWare = require('../../middleware/auth')
 const Order = require('./order.schema')
 const Store = require('../store/store.schema')
 const Employee = require('../employee/employee.schema')
@@ -12,8 +13,11 @@ const Voucher = require('../voucher/voucher.schema')
 
 const orderService = {
     async createOrder(phoneNumber, data) {
-        const user = await User.findOne({ phoneNumber })
 
+        const user = await AuthMiddleWare.authorize(phoneNumber)
+        if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
+
+        // after authen
         let newOrder = null
         if (user.roles[0] === '681c8c3c5ef65cec792c1056') {// customer create order
             newOrder = await Order.create({ ...data, owner: user._id })
@@ -27,9 +31,11 @@ const orderService = {
 
     async getMyOrders(phoneNumber, status) {
 
-        const user = await User.findOne({ phoneNumber: '0779188717' })
-        if (!user) return { statusCode: 404, success: false, message: 'User not found' }
+        // authen
+        const user = await AuthMiddleWare.authorize(phoneNumber)
+        if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
+        // after authen successfully
         let myOrders = []
         if (!status) {
             myOrders = await Order.find({ status: { $in: OrderStatus.getInProgressValues() }, owner: user._id })
@@ -39,10 +45,9 @@ const orderService = {
             myOrders = await Order.find({ status: { $in: OrderStatus.getCancelledValues() }, owner: user._id })
         }
 
-       
-       const responseData= await Promise.all(
+        const responseData = await Promise.all(
             myOrders.map(async order => {
-                const detail = await this.getOrderDetail(order._id, false)
+                const detail = await this.getOrderDetail(phoneNumber, order._id, false)
                 console.log('detail', detail)
                 return detail.data
             })
@@ -51,10 +56,12 @@ const orderService = {
         return { statusCode: 200, success: true, message: 'Get my orders successfully', data: responseData }
     },
 
-    async getOrderDetail(orderId, enableToppingItem = true) {
+    async getOrderDetail(phoneNumber, orderId, enableToppingItem = true) {
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
             return { statusCode: 400, success: false, message: 'Invalid orderId' };
         }
+        const user = await AuthMiddleWare.authorize(phoneNumber)
+        if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
         const order = await Order.findById(orderId).lean()
 
@@ -63,24 +70,57 @@ const orderService = {
         }
 
         // clone order
+        const enrichOrder = await this.enrichOrder(order, enableToppingItem)
+
+        return { statusCode: 200, success: true, message: 'Get order detail successfully', data: enrichOrder }
+    },
+
+
+
+    async updateOrderStatus(phoneNumber, orderId, status) {
+        if (!mongoose.Types.ObjectId.isValid(orderId)) {
+            return { statusCode: 400, success: false, message: 'Wrong format orderId' }
+        }
+
+        const user = await AuthMiddleWare.authorize(phoneNumber)
+        if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
+
+        const patchedOrder = await Order.findByIdAndUpdate(
+            orderId,
+            { status },
+            { new: true, runValidators: true }
+        ).lean()
+
+
+        if (patchedOrder) {
+            const enrichOrder = await this.enrichOrder(patchedOrder, true)
+            return { statusCode: 200, success: true, message: 'Update order successfully', data: enrichOrder }
+        }
+        return { statusCode: 404, success: false, message: 'Order not found' }
+    },
+
+    async enrichOrder(order, enableToppingItem = true) {
         const responseData = { ...order }
+        const [shipper, owner, creator, voucher, store] = await Promise.all([
+            this.getUserInfo(Employee, String(order.shipper)),
+            this.getUserInfo(User, String(order.owner)),
+            this.getUserInfo(Employee, String(order.creator)),
+            this.getVoucherInfo(Voucher, String(order.voucher)),
+            this.getStoreInfo(Store, String(order.store)),
+        ])
 
-
-        responseData.shipper = await this.getUserInfo(Employee, String(order.shipper))
-        responseData.owner = await this.getUserInfo(User, String(order.owner))
-        responseData.creator = await this.getUserInfo(Employee, String(order.creator))
-
-        responseData.voucher = await this.getVoucherInfo(Voucher, String(order.voucher))
-
-        responseData.store = await this.getStoreInfo(Store, String(order.store))
+        responseData.shipper = shipper
+        responseData.owner = owner
+        responseData.creator = creator
+        responseData.voucher = voucher
+        responseData.store = store
 
         responseData.orderItems = await Promise.all(
             (order.orderItems || []).map(async orderItem => {
                 return await this.getOrderItemInfo(orderItem, enableToppingItem)
             })
         )
-
-        return { statusCode: 200, success: true, message: 'Get order detail successfully', data: responseData }
+        return responseData
     },
 
     async getOrderItemInfo(orderItem, enableToppingItem = true) {
@@ -129,8 +169,6 @@ const orderService = {
             toppingItems: enableToppingItem ? toppingItems : toppingItems.length
         }
     },
-
-
 
     fallbackOrderItem(orderItem) {
         return {

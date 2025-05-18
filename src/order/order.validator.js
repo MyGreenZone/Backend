@@ -1,6 +1,6 @@
 const Joi = require('joi');
 const joiMessages = require('../../utils/joiMessages');
-const { KEY } = require('../../constants');
+const { KEY, OrderStatus } = require('../../constants');
 
 const createOrderValidator = Joi.object({
   deliveryMethod: Joi.string()
@@ -195,26 +195,57 @@ const createOrderValidator = Joi.object({
   latitude: Joi.string()
     .when('deliveryMethod', {
       is: 'delivery',
-      then: Joi.required(),
+      then: Joi.required().messages({
+        'any.required': joiMessages.any.required,
+        'string.empty': joiMessages.string.empty,
+        'string.base': joiMessages.string.base
+      }),
       otherwise: Joi.optional()
-    })
-    .messages({
-      'any.required': joiMessages.any.required,
-      'string.empty': joiMessages.string.empty,
-      'string.base': joiMessages.string.base
     }),
+
 
   longitude: Joi.string()
     .when('deliveryMethod', {
       is: 'delivery',
-      then: Joi.required(),
+      then: Joi.required().messages({
+        'any.required': joiMessages.any.required,
+        'string.empty': joiMessages.string.empty,
+        'string.base': joiMessages.string.base
+      }),
       otherwise: Joi.optional()
     })
+
+});
+
+const updateOrderValidator = Joi.object({
+  status: Joi.string()
+    .required()
+    .valid(...OrderStatus.getValues())
     .messages({
+      'any.required': joiMessages.any.required,
+      'any.only': joiMessages.any.only,
+      'string.empty': joiMessages.string.empty,
+      'string.base': joiMessages.string.base
+    }),
+
+
+  shipper: Joi.alternatives().conditional('status', {
+    is: Joi.valid('readyForPickup', 'shippingOrder', 'completed'),
+    then: Joi.string().required(),
+    otherwise: Joi.string().optional()
+  }),
+
+
+  cancelReason: Joi.alternatives().conditional('status', {
+    is: Joi.valid('cancelled', 'failedDelivery'),
+    then: Joi.string().required().messages({
       'any.required': joiMessages.any.required,
       'string.empty': joiMessages.string.empty,
       'string.base': joiMessages.string.base
-    })
-});
+    }),
+    otherwise: Joi.string().optional()
+  })
 
-module.exports = { createOrderValidator };
+})
+
+module.exports = { createOrderValidator, updateOrderValidator };

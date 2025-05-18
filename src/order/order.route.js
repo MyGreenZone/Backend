@@ -1,6 +1,6 @@
 const orderController = require('./order.controller')
 const express = require('express')
-const { verifyToken, authenticateJWT } = require('../../middleware/auth')
+const AuthMiddleWare = require('../../middleware/auth')
 
 const orderRouter = express.Router()
 /**
@@ -115,7 +115,7 @@ const orderRouter = express.Router()
  *       500:
  *         description: Lỗi server nội bộ
  */
-orderRouter.post('/create', verifyToken, orderController.createOrder);
+orderRouter.post('/create', AuthMiddleWare.verifyToken, orderController.createOrder);
 
 /**
  * @swagger
@@ -203,7 +203,10 @@ orderRouter.get('/my-order', orderController.getMyOrders);
  *       500:
  *         description: Lỗi server nội bộ
  */
-orderRouter.get('/:orderId', authenticateJWT, orderController.getOrderDetail);
+orderRouter.get('/:orderId', AuthMiddleWare.authenticateJWT, orderController.getOrderDetail);
+
+
+orderRouter.patch('/:orderId/status', AuthMiddleWare.authenticateJWT, orderController.updateOrderStatus);
 
 
 

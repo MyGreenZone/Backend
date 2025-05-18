@@ -1,5 +1,5 @@
 const orderService = require('./order.service')
-const { createOrderValidator } = require('./order.validator')
+const { createOrderValidator, updateOrderValidator } = require('./order.validator')
 const mongoose = require('mongoose')
 
 const orderController = {
@@ -30,14 +30,14 @@ const orderController = {
 
     async getMyOrders(req, res) {
         try {
-            // const phoneNumber = req.user.phoneNumber
+            const phoneNumber = req.user.phoneNumber
 
             const { status } = req.query
-            const result = await orderService.getMyOrders('0779188717', status)
+            const result = await orderService.getMyOrders(phoneNumber, status)
             return res.status(result.statusCode).json(result)
         } catch (error) {
             console.log('Error get my orders', error)
-            return res.status(500).json({ success: false, message: 'Internal server error. Path: /v1/order/my-orders ' })
+            return res.status(500).json({ statusCode: 500, success: false, message: 'Internal server error. Path: /v1/order/my-orders ' })
         }
     },
 
@@ -48,7 +48,8 @@ const orderController = {
         }
 
         try {
-            const result = await orderService.getOrderDetail(orderId);
+            const phoneNumber = req.user.phoneNumber
+            const result = await orderService.getOrderDetail(phoneNumber, orderId);
             return res.status(result.statusCode).json(result);
         } catch (error) {
             console.log("Error get order detail:", error);
@@ -59,6 +60,33 @@ const orderController = {
             });
         }
 
+    },
+
+    async updateOrderStatus(req, res) {
+        const { value, error } = updateOrderValidator.validate(req.body, { abortEarly: false })
+
+        if (error) {
+            const errors = error.details.map(err => {
+                return { message: err.message, field: err.context.field }
+            })
+            return res.status(400).json({ statusCode: 400, success: false, error: errors })
+        }
+
+        try {
+            const phoneNumber = req.user.phoneNumber
+
+            const { status, shipper, cancelReason } = req.body
+            const { orderId } = req.params
+            if (!orderId) {
+                return res.status(400).json({ statusCode: 500, success: false, message: 'Missing orderId' })
+            }
+
+            const result = await orderService.updateOrderStatus(phoneNumber, orderId, value.status)
+            return res.status(result.statusCode).json(result)
+        } catch (error) {
+            console.log('Error get my orders', error)
+            return res.status(500).json({ statusCode: 500, success: false, message: 'Internal server error. Path: /v1/order/my-orders ' })
+        }
     }
 
 
