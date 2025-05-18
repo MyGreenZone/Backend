@@ -8,6 +8,7 @@ const swaggerUi = require('swagger-ui-express');
 const mongoose = require('mongoose')
 const app = express();
 const swaggerDocument = require('../configs/swaggerConfig');
+var path = require('path');
 
 require("./auth/user.schema")
 require("./role/role.schema")
@@ -40,6 +41,9 @@ mongoose.connect("mongodb+srv://ngocdaibui99:9luzjjPyAZTUtKXF@daingoc99.ulnqr.mo
   .then(() => console.log(">>>>>>>>>> DB Connected!!!!!!"))
   .catch((err) => console.log(">>>>>>>>> DB Error: ", err));
 
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hbs');
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use(logger('dev'));
@@ -47,6 +51,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
 app.use('/auth', authRouter);
