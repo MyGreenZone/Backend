@@ -128,9 +128,9 @@ const orderService = {
         }
 
         const currentOrderStatusPosition = OrderStatus.getPositionByValue(existingOrder.status)
-        console.log('current =', currentOrderStatusPosition)
+    
         const newOrderStatusPosition = OrderStatus.getPositionByValue(newStatus)
-        console.log('new =', newOrderStatusPosition)
+
 
 
         if ([0, 1].includes(currentOrderStatusPosition) && newStatus === OrderStatus.CANCELLED.value) return null
