@@ -257,4 +257,23 @@ const updateOrderValidator = Joi.object({
 
 })
 
-module.exports = { createOrderValidator, updateOrderValidator };
+const updatePaymentStatusValidator = Joi.object({
+  paymentStatus: Joi.string().trim()
+    .valid('success', 'failed', 'cancelled')
+    .required()
+    .messages({
+      'any.required': joiMessages.any.required,
+      'any.only': 'paymentStatus phải là một trong 3 giá trị: success, failed, cancelled',
+      'string.empty': joiMessages.string.empty,
+      'string.base': joiMessages.string.base
+    }),
+  transactionId: Joi.string().trim()
+    .required()
+    .messages({
+      'any.required': joiMessages.any.required,
+      'string.empty': joiMessages.string.empty,
+      'string.base': joiMessages.string.base
+    }),
+})
+
+module.exports = { createOrderValidator, updateOrderValidator, updatePaymentStatusValidator };

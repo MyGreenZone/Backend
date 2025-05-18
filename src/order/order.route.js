@@ -280,7 +280,72 @@ orderRouter.get('/:orderId', AuthMiddleWare.authenticateJWT, orderController.get
 orderRouter.patch('/:orderId/status', AuthMiddleWare.authenticateJWT, orderController.updateOrderStatus);
 
 
-
+/**
+ * @swagger
+ * /v1/order/{orderId}/payment:
+ *   patch:
+ *     summary: Cập nhật trạng thái thanh toán
+ *     description: (paymentStatus) success || failed || cancelled
+ *     tags:
+ *       - Order
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         description: ID của đơn hàng cần cập nhật
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               paymentStatus:
+ *                 type: string
+ *                 example: success
+ *               transactionId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Cập nhật thanh toán thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: number
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Yêu cầu không hợp lệ (sai format ID hoặc không thể chuyển trạng thái)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: number
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Không tìm thấy đơn hàng
+ *       500:
+ *         description: Lỗi server
+ */
+orderRouter.patch('/:orderId/payment', AuthMiddleWare.authenticateJWT, orderController.updatePaymentStatus);
 
 
 

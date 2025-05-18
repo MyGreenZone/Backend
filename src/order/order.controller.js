@@ -1,5 +1,5 @@
 const orderService = require('./order.service')
-const { createOrderValidator, updateOrderValidator } = require('./order.validator')
+const { createOrderValidator, updateOrderValidator, updatePaymentStatusValidator } = require('./order.validator')
 const mongoose = require('mongoose')
 
 const orderController = {
@@ -75,7 +75,6 @@ const orderController = {
         try {
             const phoneNumber = req.user.phoneNumber
 
-      
             const { orderId } = req.params
             if (!orderId) {
                 return res.status(400).json({ statusCode: 500, success: false, message: 'Missing orderId' })
@@ -84,10 +83,39 @@ const orderController = {
             const result = await orderService.updateOrderStatus(phoneNumber, orderId, validateValue)
             return res.status(result.statusCode).json(result)
         } catch (error) {
-            console.log('Error get my orders', error)
+            console.log('Error update order status', error)
             return res.status(500).json({ statusCode: 500, success: false, message: `Internal server error. Update order status Error:${error} ` })
         }
+    },
+
+    async updatePaymentStatus(req, res) {
+        const { value: validateValue, error } = updatePaymentStatusValidator.validate(req.body, { abortEarly: false })
+
+        if (error) {
+            const errors = error.details.map(err => {
+                return { message: err.message, field: err.context.field }
+            })
+            return res.status(400).json({ statusCode: 400, success: false, error: errors })
+        }
+
+        try {
+            const phoneNumber = req.user.phoneNumber
+
+            const { orderId } = req.params
+            if (!orderId) {
+                return res.status(400).json({ statusCode: 500, success: false, message: 'Missing orderId' })
+            }
+
+            const result = await orderService.updatePaymentStatus(phoneNumber, orderId, validateValue)
+            return res.status(result.statusCode).json(result)
+        } catch (error) {
+            console.log('Error update payment status', error)
+            return res.status(500).json({ statusCode: 500, success: false, message: `Internal server error. Update payment status Error:${error} ` })
+        }
     }
+
+
+
 
 
 

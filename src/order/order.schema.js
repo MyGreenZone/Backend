@@ -32,7 +32,8 @@ const orderSchema = new Schema({
     creator: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.EMPLOYEE, default: null },
     store: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.STORE, required: true },
     voucher: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.VOUCHER, default: null },
-
+    paymentStatus: { type: String, enum: ['success', 'failed', 'cancelled'] },
+    transactionId: { type: String },
     orderItems: [{
         variant: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.VARIANT, required: true },
         quantity: { type: Number, required: true, default: 1, min: 1 },

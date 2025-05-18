@@ -73,6 +73,48 @@ const orderService = {
         return { statusCode: 200, success: true, message: 'Get order detail successfully', data: enrichOrder }
     },
 
+    async updatePaymentStatus(phoneNumber, orderId, requestBody) {
+        if (!mongoose.Types.ObjectId.isValid(orderId)) {
+            return { statusCode: 400, success: false, message: 'Wrong format orderId' }
+        }
+
+        const user = await AuthMiddleWare.authorize(phoneNumber)
+        if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
+
+        const existingOrder = await Order.findById(orderId).lean()
+        if (!existingOrder) return { statusCode: 404, success: false, message: 'Order not found' }
+
+
+        if (existingOrder.status !== OrderStatus.AWAITING_PAYMENT.value) {
+            return {
+                statusCode: 400,
+                success: false,
+                message: 'Cannot update payment status when order status is different from awaitingPayment'
+            }
+        }
+
+        if (existingOrder.paymentMethod === 'cod') {
+            return { statusCode: 400, success: false, message: 'Cannot update payment status with COD payment' }
+        }
+
+        const patchedData = requestBody.paymentStatus === 'success' ?
+            { ...requestBody, status: OrderStatus.PENDING_CONFIRMATION.value } :
+            { ...requestBody }
+
+
+        const patchedOrder = await Order.findByIdAndUpdate(
+            orderId,
+            patchedData,
+            { new: true, runValidators: true }
+        ).lean()
+
+
+        if (patchedOrder) {
+            const enrichOrder = await this.enrichOrder(patchedOrder, true)
+            return { statusCode: 200, success: true, message: 'Update order successfully', data: enrichOrder }
+        }
+        return { statusCode: 500, success: false, message: 'Failed to update order' }
+    },
 
 
     async updateOrderStatus(phoneNumber, orderId, requestBody) {
@@ -87,9 +129,6 @@ const orderService = {
         const invalidStatusFlow = await this.validateStatusFlow(orderId, requestBody.status, requestBody)
         if (invalidStatusFlow) return invalidStatusFlow
 
-
-
-
         const patchedData = this.extractPatchedData(requestBody)
 
         const patchedOrder = await Order.findByIdAndUpdate(orderId, patchedData, { new: true, runValidators: true }).lean()
@@ -97,9 +136,9 @@ const orderService = {
 
         if (patchedOrder) {
             const enrichOrder = await this.enrichOrder(patchedOrder, true)
-            return { statusCode: 200, success: true, message: 'Update order successfully', data: { enrichOrder } }
+            return { statusCode: 200, success: true, message: 'Update order successfully', data: enrichOrder }
         }
-
+        return { statusCode: 500, success: false, message: 'Failed to update order' }
     },
 
     extractPatchedData(requestBody) {
@@ -128,9 +167,8 @@ const orderService = {
         }
 
         const currentOrderStatusPosition = OrderStatus.getPositionByValue(existingOrder.status)
-    
-        const newOrderStatusPosition = OrderStatus.getPositionByValue(newStatus)
 
+        const newOrderStatusPosition = OrderStatus.getPositionByValue(newStatus)
 
 
         if ([0, 1].includes(currentOrderStatusPosition) && newStatus === OrderStatus.CANCELLED.value) return null
