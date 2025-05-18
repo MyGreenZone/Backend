@@ -35,7 +35,7 @@ const AuthMiddleWare = (() => {
     }
   };
 
-  const authorize = async (phoneNumber = '0779188717') => {
+  const authorize = async (phoneNumber) => {
     // phoneNumber lấy từ JWT
     const user = await User.findOne({ phoneNumber })
     if (!user) return null

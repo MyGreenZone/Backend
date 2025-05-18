@@ -123,6 +123,8 @@ orderRouter.post('/create', AuthMiddleWare.verifyToken, orderController.createOr
  *   get:
  *     summary: Lấy danh sách đơn hàng của người dùng
  *     tags: [Order]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: status
@@ -206,7 +208,71 @@ orderRouter.get('/my-order', orderController.getMyOrders);
 orderRouter.get('/:orderId', AuthMiddleWare.authenticateJWT, orderController.getOrderDetail);
 
 
+/**
+ * @swagger
+ * /v1/order/{orderId}/status:
+ *   patch:
+ *     summary: Cập nhật trạng thái đơn hàng
+ *     description: (status) awaitingPayment -> pendingConfirmation -> processing -> readyForPickup -> shippingOrder -> completed / cancelled / failedDelivery
+ *     tags:
+ *       - Order
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         description: ID của đơn hàng cần cập nhật
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 example: processing
+ *     responses:
+ *       200:
+ *         description: Cập nhật trạng thái thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: number
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Yêu cầu không hợp lệ (sai format ID hoặc không thể chuyển trạng thái)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: number
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Không tìm thấy đơn hàng
+ *       500:
+ *         description: Lỗi server
+ */
 orderRouter.patch('/:orderId/status', AuthMiddleWare.authenticateJWT, orderController.updateOrderStatus);
+
 
 
 
