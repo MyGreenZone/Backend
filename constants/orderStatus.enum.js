@@ -8,11 +8,13 @@ const OrderStatus = Object.freeze({
     CANCELLED: { label: "Đã hủy", value: "cancelled", position: 5 },
     FAILED_DELIVERY: { label: "Giao hàng thất bại", value: "failedDelivery", position: 5 },
 
-    getPositionByValue(value){
-        const status = this.getValues().find(v => v.position === value)
-        return status ? status.position : 'Position not found'
+    getPositionByValue(value) {
+        const statuses = Object.values(this).filter(v => typeof v === 'object' && v.value);
+        const status = statuses.find(v => v.value === value);
+        return status ? status.position : 'Position not found';
     },
-    
+
+
     getInProgressValues() {
         return [
             this.AWAITING_PAYMENT.value,

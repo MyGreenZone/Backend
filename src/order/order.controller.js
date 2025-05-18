@@ -63,7 +63,7 @@ const orderController = {
     },
 
     async updateOrderStatus(req, res) {
-        const { value, error } = updateOrderValidator.validate(req.body, { abortEarly: false })
+        const { value: validateValue, error } = updateOrderValidator.validate(req.body, { abortEarly: false })
 
         if (error) {
             const errors = error.details.map(err => {
@@ -75,17 +75,17 @@ const orderController = {
         try {
             const phoneNumber = req.user.phoneNumber
 
-            const { status, shipper, cancelReason } = req.body
+      
             const { orderId } = req.params
             if (!orderId) {
                 return res.status(400).json({ statusCode: 500, success: false, message: 'Missing orderId' })
             }
 
-            const result = await orderService.updateOrderStatus(phoneNumber, orderId, value.status)
+            const result = await orderService.updateOrderStatus(phoneNumber, orderId, validateValue)
             return res.status(result.statusCode).json(result)
         } catch (error) {
             console.log('Error get my orders', error)
-            return res.status(500).json({ statusCode: 500, success: false, message: 'Internal server error. Path: /v1/order/my-orders ' })
+            return res.status(500).json({ statusCode: 500, success: false, message: `Internal server error. Update order status Error:${error} ` })
         }
     }
 

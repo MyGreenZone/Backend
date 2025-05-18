@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const { OrderStatus } = require('../../constants')
+const { OrderStatus, DeliveryMethod } = require('../../constants')
 const AuthMiddleWare = require('../../middleware/auth')
 const Order = require('./order.schema')
 const Store = require('../store/store.schema')
@@ -75,7 +75,7 @@ const orderService = {
 
 
 
-    async updateOrderStatus(phoneNumber, orderId, newStatus) {
+    async updateOrderStatus(phoneNumber, orderId, requestBody) {
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
             return { statusCode: 400, success: false, message: 'Wrong format orderId' }
         }
@@ -84,24 +84,43 @@ const orderService = {
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
 
-        const invalidStatusFlow = await this.validateStatusFlow(orderId, newStatus)
+        const invalidStatusFlow = await this.validateStatusFlow(orderId, requestBody.status, requestBody)
         if (invalidStatusFlow) return invalidStatusFlow
 
-        const patchedOrder = await Order.findByIdAndUpdate(
-            orderId,
-            { status: newStatus },
-            { new: true, runValidators: true }
-        ).lean()
+
+
+
+        const patchedData = this.extractPatchedData(requestBody)
+
+        const patchedOrder = await Order.findByIdAndUpdate(orderId, patchedData, { new: true, runValidators: true }).lean()
 
 
         if (patchedOrder) {
             const enrichOrder = await this.enrichOrder(patchedOrder, true)
-            return { statusCode: 200, success: true, message: 'Update order successfully', data: enrichOrder }
+            return { statusCode: 200, success: true, message: 'Update order successfully', data: { enrichOrder } }
         }
 
     },
 
-    async validateStatusFlow(orderId, newStatus) {
+    extractPatchedData(requestBody) {
+        switch (requestBody.status) {
+            case OrderStatus.READY_FOR_PICKUP.value:
+            case OrderStatus.SHIPPING_ORDER.value:
+            case OrderStatus.COMPLETED.value: {
+                return { status: requestBody.status, shipper: requestBody.shipper }
+            }
+            case OrderStatus.CANCELLED.value:
+            case OrderStatus.FAILED_DELIVERY.value: {
+                return { status: requestBody.status, shipper: requestBody.shipper, cancelReason: requestBody.cancelReason }
+            }
+
+            default: {
+                return { status: requestBody.status }
+            }
+        }
+    },
+
+    async validateStatusFlow(orderId, newStatus, requestBody) {
         // Lấy order hiện tại
         const existingOrder = await Order.findById(orderId).lean()
         if (!existingOrder) {
@@ -109,14 +128,35 @@ const orderService = {
         }
 
         const currentOrderStatusPosition = OrderStatus.getPositionByValue(existingOrder.status)
+        console.log('current =', currentOrderStatusPosition)
         const newOrderStatusPosition = OrderStatus.getPositionByValue(newStatus)
-        if (currentOrderStatusPosition >= newOrderStatusPosition) {
+        console.log('new =', newOrderStatusPosition)
+
+
+        if ([0, 1].includes(currentOrderStatusPosition) && newStatus === OrderStatus.CANCELLED.value) return null
+
+        if (currentOrderStatusPosition === 3 &&
+            newOrderStatusPosition == 5 &&
+            existingOrder.deliveryMethod === DeliveryMethod.PICK_UP.value) {
+            return null
+        }
+
+        if (currentOrderStatusPosition >= newOrderStatusPosition ||
+            newOrderStatusPosition != currentOrderStatusPosition + 1
+        ) {
             return {
                 statusCode: 400,
                 success: false,
                 message: `Cannot update order status from ${existingOrder.status.toUpperCase()} to ${newStatus.toUpperCase()}`
             }
         }
+
+        if (existingOrder.status === OrderStatus.PROCESSING.value && newStatus === OrderStatus.READY_FOR_PICKUP.value) {
+            const shipper = await Employee.findById(requestBody.shipper)
+            if (!shipper) return { statusCode: 404, success: false, message: 'Cannot update. Shipper not found' }
+        }
+
+
         return null
     },
 

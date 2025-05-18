@@ -235,6 +235,12 @@ orderRouter.get('/:orderId', AuthMiddleWare.authenticateJWT, orderController.get
  *               status:
  *                 type: string
  *                 example: processing
+ *               shipper:
+ *                 type: string
+ *                 example: shipperId
+ *               cancelReason:
+ *                 type: string
+ *                 example: Mình thích thì mình hủy zị ó :)
  *     responses:
  *       200:
  *         description: Cập nhật trạng thái thành công

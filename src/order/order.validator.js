@@ -218,7 +218,7 @@ const createOrderValidator = Joi.object({
 });
 
 const updateOrderValidator = Joi.object({
-  status: Joi.string()
+  status: Joi.string().trim()
     .required()
     .valid(...OrderStatus.getValues())
     .messages({
@@ -230,20 +230,29 @@ const updateOrderValidator = Joi.object({
 
 
   shipper: Joi.alternatives().conditional('status', {
-    is: Joi.valid('readyForPickup', 'shippingOrder', 'completed'),
-    then: Joi.string().required(),
-    otherwise: Joi.string().optional()
+    is: Joi.valid('readyForPickup'),
+    then: Joi.string().trim().pattern(KEY.OBJECT_ID_PATTERN).required().messages({
+      'any.required': joiMessages.any.required,
+      'string.empty': joiMessages.string.empty,
+      'string.base': joiMessages.string.base,
+      'string.pattern.base': 'Field shipper không đúng định dạng ObjectId'
+    }),
+    otherwise: Joi.forbidden().messages({
+      'any.unknown': 'Không truyền shipper nếu status không phải là readyForPickup'
+    })
   }),
 
 
   cancelReason: Joi.alternatives().conditional('status', {
     is: Joi.valid('cancelled', 'failedDelivery'),
-    then: Joi.string().required().messages({
+    then: Joi.string().trim().required().messages({
       'any.required': joiMessages.any.required,
       'string.empty': joiMessages.string.empty,
       'string.base': joiMessages.string.base
     }),
-    otherwise: Joi.string().optional()
+    otherwise: Joi.forbidden().messages({
+      'any.unknown': 'Không truyền cancelReason nếu status không phải là cancelled hoặc failedDelivery.'
+    })
   })
 
 })
