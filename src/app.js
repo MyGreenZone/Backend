@@ -65,6 +65,9 @@ app.use('/v1/variant', variantRouter);
 app.use('/v1/voucher', voucherRouter);
 app.use('/v1/order', orderRouter);
 
+app.get('/', (req, res) => {
+  res.send('Server is running!');
+});
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
@@ -80,8 +83,6 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
 });
 
-app.get('/', (req, res) => {
-  res.send('Server is running!');
-});
+
 
 module.exports = app
