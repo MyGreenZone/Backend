@@ -36,8 +36,8 @@ const voucherRouter = require('./voucher/voucher.route');
 const orderRouter = require('./order/order.route');
 
 // https://restapirepo.onrender.com/
-// mongoose.connect("mongodb://localhost:27017/MyGreenZone")
-mongoose.connect("mongodb+srv://ngocdaibui99:9luzjjPyAZTUtKXF@daingoc99.ulnqr.mongodb.net/MyGreenZone")
+mongoose.connect("mongodb://localhost:27017/MyGreenZone")
+// mongoose.connect("mongodb+srv://ngocdaibui99:9luzjjPyAZTUtKXF@daingoc99.ulnqr.mongodb.net/MyGreenZone")
   .then(() => console.log(">>>>>>>>>> DB Connected!!!!!!"))
   .catch((err) => console.log(">>>>>>>>> DB Error: ", err));
 

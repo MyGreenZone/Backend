@@ -10,7 +10,7 @@ const userSchema = new Schema({
   avatar: { type: String, default: null },
   verifyPhoneNumber: { type: Boolean, default: false },
   verifyMail: { type: Boolean, default: false },
-  seed: { type: Number, default: 0 }, // <== Thêm default
+  seed: { type: Number, default: 0 }, 
   code: {
     type: String, default: function () {
       // Tạo mã ví dụ như: G + thời gian hoặc random

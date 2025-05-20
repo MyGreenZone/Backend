@@ -109,8 +109,12 @@ const orderService = {
         ).lean()
 
 
+
         if (patchedOrder) {
+
+
             const enrichOrder = await this.enrichOrder(patchedOrder, true)
+
             return { statusCode: 200, success: true, message: 'Update order successfully', data: enrichOrder }
         }
         return { statusCode: 500, success: false, message: 'Failed to update order' }
@@ -135,6 +139,16 @@ const orderService = {
 
 
         if (patchedOrder) {
+            // update user's seed if newStatus = 'completed'
+            if (requestBody.status === OrderStatus.COMPLETED.value) {
+                const user = await User.findById(patchedOrder.owner).lean()
+                if (!user) return { statusCode: 400, success: false, message: 'User not found' }
+                const updatedSeed = user.seed + Math.round(patchedOrder.totalPrice * 0.00001)
+                const updatedUser = await User.findByIdAndUpdate(patchedOrder.owner, { seed: updatedSeed }, { new: true, runValidators: true })
+                if (updatedUser) {
+                    console.log('Update successfully', updatedUser.seed)
+                }
+            }
             const enrichOrder = await this.enrichOrder(patchedOrder, true)
             return { statusCode: 200, success: true, message: 'Update order successfully', data: enrichOrder }
         }
