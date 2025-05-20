@@ -1,6 +1,6 @@
 const orderService = require('./order.service')
 const { createOrderValidator, updateOrderValidator, updatePaymentStatusValidator } = require('./order.validator')
-const mongoose = require('mongoose')
+
 
 const orderController = {
     async createOrder(req, res) {

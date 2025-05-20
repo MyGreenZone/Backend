@@ -1,6 +1,6 @@
 const voucherController = require('./voucher.controller')
 const express = require('express')
-
+const AuthMiddleWare = require('../../middleware/auth')
 const voucherRouter = express.Router()
 
 
@@ -199,6 +199,9 @@ voucherRouter.get('/:voucherId', voucherController.getVoucherDetail)
  *         description: Không tìm thấy voucher
  */
 voucherRouter.put('/:voucherId', voucherController.updateVoucher)
+
+
+voucherRouter.put('/exchange/:voucherId', AuthMiddleWare.authenticateJWT, voucherController.exchangeSeed)
 
 
 

@@ -54,12 +54,12 @@ const voucherController = {
     },
 
     async updateVoucher(req, res) {
-        const {voucherId} = req.params
-        if(!mongoose.Types.ObjectId.isValid(voucherId)){
-            return res.status(400).json({statusCode: 400, success: false, message: 'Wrong format voucherId'})
+        const { voucherId } = req.params
+        if (!mongoose.Types.ObjectId.isValid(voucherId)) {
+            return res.status(400).json({ statusCode: 400, success: false, message: 'Wrong format voucherId' })
         }
 
-        
+
         const { value, error } = voucherValidator.validate(req.body, { abortEarly: false, convert: true })
 
         if (error) {
@@ -81,6 +81,30 @@ const voucherController = {
             });
         }
     },
+
+    async exchangeSeed(req, res) {
+        const { voucherId } = req.params
+        if (!voucherId) {
+            return res.status(400).json({ statusCode: 400, success: false, message: 'Missing voucherId' })
+        }
+        if (!mongoose.Types.ObjectId.isValid(voucherId)) {
+            return res.status(400).json({ statusCode: 400, success: false, message: 'Wrong format voucherId' })
+        }
+
+        try {
+            const phoneNumber = req.user.phoneNumber
+            const result = await voucherService.exchangeSeed({voucherId, phoneNumber});
+            return res.status(result.statusCode).json(result);
+
+        } catch (error) {
+            console.log("Error exchange voucher:", error);
+            return res.status(500).json({
+                statusCode: 500,
+                success: false,
+                message: 'Lỗi khi exchange voucher',
+            });
+        }
+    }
 }
 
 module.exports = voucherController

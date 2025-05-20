@@ -1,5 +1,9 @@
 const Voucher = require('./voucher.schema')
+const UserVoucher = require('../userVoucher/userVoucher.schema')
+
+
 const voucherValidator = require('./voucher.validator')
+const AuthMiddleWare = require('../../middleware/auth')
 const voucherService = {
     async createVoucher(data) {
         const { code } = data
@@ -48,6 +52,40 @@ const voucherService = {
             message: 'Updated voucher successfully',
             data: updatedVoucher
         };
+    },
+
+    async exchangeSeed({ voucherId, phoneNumber }) {
+
+        const user = await AuthMiddleWare.authorize(phoneNumber)
+        if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
+
+
+        const voucher = await Voucher.findById(voucherId).lean()
+        if (!voucher) return { statusCode: 404, success: false, message: 'Voucher not found' }
+        const isExpired = voucher.endDate < new Date();
+        const isInactive = voucher.status === 'inactive';
+        if (isExpired || isInactive) {
+            return { statusCode: 400, success: false, message: 'Voucher is inactive or expired' };
+        }
+
+        if (voucher.voucherType !== 'seed') {
+            return { statusCode: 400, success: false, message: 'Voucher is not exchangeable with seed' };
+        }
+
+        if (user.seed < voucher.requiredPoints) {
+            return { statusCode: 400, success: false, message: 'Not enough seed' };
+        }
+
+
+        user.seed -= voucher.requiredPoints
+        await user.save()
+
+        await UserVoucher.create({
+            userId: user._id,
+            voucherId: voucher._id,
+            exchangedAt: new Date()
+        })
+        return { statusCode: 200, success: true, message: 'Exchange voucher successfully' }
     }
 
 

@@ -13,7 +13,8 @@ const MODEL_NAMES = Object.freeze({
     VARIANT: 'Variant',
     TOPPING: 'Topping',
     VOUCHER: 'Voucher',
-    ORDER: 'Order'
+    ORDER: 'Order',
+    USER_VOUCHER: 'UserVoucher'
 })
 
 module.exports = MODEL_NAMES;

@@ -22,6 +22,7 @@ require("./product/product.schema")
 require("./variant/variant.schema")
 require("./voucher/voucher.schema")
 require("./order/order.schema")
+require("./userVoucher/userVoucher.schema")
 
 
 const authRouter = require('./auth/auth.route');
