@@ -201,7 +201,50 @@ voucherRouter.get('/:voucherId', voucherController.getVoucherDetail)
 voucherRouter.put('/:voucherId', voucherController.updateVoucher)
 
 
-voucherRouter.put('/exchange/:voucherId', AuthMiddleWare.authenticateJWT, voucherController.exchangeSeed)
+voucherRouter.put('/exchange/:voucherId', AuthMiddleWare.authenticateJWT, voucherController.exchangeSeed)/**
+ * @swagger
+ * /v1/voucher/exchange/{voucherId}:
+ *   put:
+ *     summary: Exchange seed points for a voucher
+ *     tags:
+ *       - Voucher
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: voucherId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the voucher to exchange
+ *     responses:
+ *       200:
+ *         description: Exchange voucher successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request or not enough seed
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Voucher not found
+ *       500:
+ *         description: Server error
+ */
+voucherRouter.put(
+  '/exchange/:voucherId',
+  AuthMiddleWare.authenticateJWT,
+  voucherController.exchangeSeed
+);
 
 
 

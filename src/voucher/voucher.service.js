@@ -71,11 +71,11 @@ const voucherService = {
         if (voucher.voucherType !== 'seed') {
             return { statusCode: 400, success: false, message: 'Voucher is not exchangeable with seed' };
         }
+        console.log('userSeed', user.seed, 'requiredPoint', voucher.requiredPoints)
 
         if (user.seed < voucher.requiredPoints) {
             return { statusCode: 400, success: false, message: 'Not enough seed' };
         }
-
 
         user.seed -= voucher.requiredPoints
         await user.save()
