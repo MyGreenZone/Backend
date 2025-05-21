@@ -19,43 +19,12 @@ const orderService = {
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
         // after authen
+        const result = await this.validateVoucher(requestBody.voucher, user._id);
+        if (!result.success) return result;
 
-        const voucher = await Voucher.findById(requestBody.voucher)
-        if (!voucher) return { statusCode: 404, success: false, message: 'Create order failed. Voucher not found' }
-
-        if (voucher.voucherType === 'seed') {
-            const exchangeableVoucher = await UserVoucher.findOne({
-                userId: user._id,
-                voucherId: voucher._id,
-                used: false
-            }).populate('voucherId')
-
-            if (!exchangeableVoucher)
-                return { statusCode: 400, success: false, message: 'Tạo đơn thất bại. Bạn chưa đổi voucher này. Không thể sử dụng' }
-
-            const isExpired = exchangeableVoucher.voucherId.endDate < new Date();
-            const isInactive = exchangeableVoucher.voucherId.status === 'inactive';
-
-
-            if (isExpired || isInactive) {
-                return { statusCode: 400, success: false, message: 'Tạo đơn thất bại. Voucher is inactive or expired' };
-            }
-
-            // pass hết điều kiện voucher thì sẽ dùng voucher này
-            exchangeableVoucher.used = true
-            exchangeableVoucher.usedAt = new Date()
-            await exchangeableVoucher.save()
-        }
-        // global voucher
-        const isExpired = voucher.endDate < new Date();
-        const isInactive = voucher.status === 'inactive';
-
-        if (isExpired || isInactive) {
-            return { statusCode: 400, success: false, message: 'Tạo đơn thất bại. Voucher is inactive or expired' };
-        }
-
+        const exchangeableVoucher = result.exchangeableVoucher
         // pass hết thì tạo order
-        
+
         let newOrder = null
         const status = requestBody.paymentMethod === 'online' ?
             OrderStatus.AWAITING_PAYMENT.value :
@@ -74,8 +43,54 @@ const orderService = {
         }
 
 
+        if (newOrder && exchangeableVoucher) {
+            exchangeableVoucher.used = true
+            exchangeableVoucher.usedAt = new Date()
+            await exchangeableVoucher.save()
+        }
+
+
         return { statusCode: 201, success: true, message: 'Created order successfully', data: newOrder }
     },
+
+    async validateVoucher(voucherId, userId) {
+        const voucher = await Voucher.findById(voucherId)
+        if (!voucher) return { statusCode: 404, success: false, message: 'Create order failed. Voucher not found' }
+
+        const isExpired = voucher.endDate < new Date();
+        const isInactive = voucher.status === 'inactive';
+
+        // Kiểm tra voucher hết hạn hoặc không hoạt động trước
+        if (isExpired || isInactive) {
+            return {
+                statusCode: 400,
+                success: false,
+                message: 'Tạo đơn thất bại. Voucher is inactive or expired'
+            };
+        }
+
+        if (voucher.voucherType === 'seed') {
+            const exchangeableVoucher = await UserVoucher.findOne({
+                userId,
+                voucherId: voucher._id,
+                used: false
+            }).populate('voucherId');
+
+            if (!exchangeableVoucher) {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Tạo đơn thất bại. Bạn chưa đổi voucher này. Không thể sử dụng'
+                };
+            }
+
+            return { success: true, exchangeableVoucher };
+        }
+
+        // Trường hợp voucher global hoặc các loại khác không cần thêm xử lý
+        return { success: true };
+    },
+
 
     async getMyOrders(phoneNumber, status) {
 
