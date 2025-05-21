@@ -79,8 +79,6 @@ const voucherService = {
             return { statusCode: 400, success: false, message: 'Bạn đã có voucher này rồi. Hãy dùng trước khi đổi thêm nhé!' };
         }
 
-
-
         if (user.seed < voucher.requiredPoints) {
             return { statusCode: 400, success: false, message: 'Not enough seed' };
         }

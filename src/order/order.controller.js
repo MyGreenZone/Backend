@@ -4,29 +4,41 @@ const { createOrderValidator, updateOrderValidator, updatePaymentStatusValidator
 
 const orderController = {
     async createOrder(req, res) {
-        const { value, error } = createOrderValidator.validate(req.body, { abortEarly: false, convert: true })
+        const { value, error } = createOrderValidator.validate(req.body, { abortEarly: false, convert: true });
         if (error) {
-            const errors = error.details.map(err => {
-                return { message: err.message, field: err.context.label }
-            })
-            return res.status(400).json({ statusCode: 400, success: false, error: errors })
+            const errors = error.details.map(err => ({
+                message: err.message,
+                field: err.context.label
+            }));
+            return res.status(400).json({
+                statusCode: 400,
+                success: false,
+                error: errors,
+                timestamp: new Date().toISOString(),
+                path: req.originalUrl
+            });
         }
 
-
-
         try {
-            const phoneNumber = req.user.phoneNumber
+            const phoneNumber = req.user.phoneNumber;
             const result = await orderService.createOrder(phoneNumber, value);
-            return res.status(result.statusCode).json(result);
+            return res.status(result.statusCode).json({
+                ...result,
+                timestamp: new Date().toISOString(),
+                path: req.originalUrl
+            });
         } catch (error) {
             console.log("Error creating order:", error);
             return res.status(500).json({
                 statusCode: 500,
                 success: false,
-                message: 'Error creating order:',
+                message: 'Error creating order',
+                timestamp: new Date().toISOString(),
+                path: req.originalUrl
             });
         }
     },
+
 
     async getMyOrders(req, res) {
         try {

@@ -18,35 +18,51 @@ const orderService = {
         const user = await AuthMiddleWare.authorize(phoneNumber)
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
+        // after authen
+
         const voucher = await Voucher.findById(requestBody.voucher)
         if (!voucher) return { statusCode: 404, success: false, message: 'Create order failed. Voucher not found' }
 
-        if(voucher.type === 'seed'){
+        if (voucher.voucherType === 'seed') {
             const exchangeableVoucher = await UserVoucher.findOne({
                 userId: user._id,
-                voucher: voucher._id,
+                voucherId: voucher._id,
                 used: false
-            })
-            if(!exchangeableVoucher) 
-                return { statusCode: 400, success: false, message: 'Create order failed. Voucher not found' }
+            }).populate('voucherId')
 
+            if (!exchangeableVoucher)
+                return { statusCode: 400, success: false, message: 'Tạo đơn thất bại. Bạn chưa đổi voucher này. Không thể sử dụng' }
+
+            const isExpired = exchangeableVoucher.voucherId.endDate < new Date();
+            const isInactive = exchangeableVoucher.voucherId.status === 'inactive';
+
+      
+            if (isExpired || isInactive) {
+                return { statusCode: 400, success: false, message: 'Tạo đơn thất bại.Voucher is inactive or expired' };
+            }
+
+            // pass hết điều kiện voucher thì sẽ dùng voucher này
+            exchangeableVoucher.used = true
+            exchangeableVoucher.usedAt = new Date()
+            await exchangeableVoucher.save()
         }
-        // after authen
+
         let newOrder = null
         const status = requestBody.paymentMethod === 'online' ?
             OrderStatus.AWAITING_PAYMENT.value :
             OrderStatus.PENDING_CONFIRMATION.value
 
 
-        if (user.roles[0] === '681c8c3c5ef65cec792c1056') {// customer create order
+        const userRole = user.roles[0].toString()
+        const customerRole = '681c8c3c5ef65cec792c1056'
+        const isCustomer = userRole === customerRole
+
+        if (isCustomer) {// customer create order
             newOrder = await Order.create({ ...requestBody, status, owner: user._id })
         } else { // merchant create order
             const newGuest = await User.create()
             newOrder = await Order.create({ ...requestBody, status, owner: newGuest._id })
-
-           
         }
-
 
 
         return { statusCode: 201, success: true, message: 'Created order successfully', data: newOrder }
@@ -164,7 +180,7 @@ const orderService = {
         if (patchedOrder) {
             // update user's seed if newStatus = 'completed'
             if (requestBody.status === OrderStatus.COMPLETED.value) {
-                const earnedSeed = Math.round(patchedOrder.totalPrice * 0.00001)
+                const earnedSeed = Math.round(patchedOrder.totalPrice * 0.0001)
                 await User.findByIdAndUpdate(
                     patchedOrder.owner,
                     { $inc: { seed: earnedSeed } },
