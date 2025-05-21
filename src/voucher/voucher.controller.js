@@ -9,7 +9,7 @@ const voucherController = {
             const errors = error.details.map(err => {
                 return { message: err.message, field: err.context.label }
             })
-            return res.status(400).json({ statusCode: 400, success: false, errors })
+            return res.status(400).json({ statusCode: 400, success: false, error: errors })
         }
 
         try {
@@ -41,14 +41,15 @@ const voucherController = {
 
     async getVoucherDetail(req, res) {
         try {
-            const result = await voucherService.getAllVouchers();
+            const {voucherId} = req.params
+            const result = await voucherService.getVoucherDetail(voucherId);
             return res.status(result.statusCode).json(result);
         } catch (error) {
-            console.log("Error get all vouchers", error);
+            console.log("Error get voucher detail", error);
             return res.status(500).json({
                 statusCode: 500,
                 success: false,
-                message: 'Error get all vouchers',
+                message: 'Error get voucher detail',
             });
         }
     },

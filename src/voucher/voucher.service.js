@@ -1,8 +1,5 @@
 const Voucher = require('./voucher.schema')
 const UserVoucher = require('../userVoucher/userVoucher.schema')
-
-
-const voucherValidator = require('./voucher.validator')
 const AuthMiddleWare = require('../../middleware/auth')
 const voucherService = {
     async createVoucher(data) {
@@ -71,7 +68,18 @@ const voucherService = {
         if (voucher.voucherType !== 'seed') {
             return { statusCode: 400, success: false, message: 'Voucher is not exchangeable with seed' };
         }
-        console.log('userSeed', user.seed, 'requiredPoint', voucher.requiredPoints)
+
+        // check xem co record chua
+        const alreadyOwned = await UserVoucher.findOne({
+            userId: user._id,
+            voucherId,
+            used: false
+        })
+        if (alreadyOwned) {
+            return { statusCode: 400, success: false, message: 'Bạn đã có voucher này rồi. Hãy dùng trước khi đổi thêm nhé!' };
+        }
+
+
 
         if (user.seed < voucher.requiredPoints) {
             return { statusCode: 400, success: false, message: 'Not enough seed' };
@@ -83,6 +91,7 @@ const voucherService = {
         await UserVoucher.create({
             userId: user._id,
             voucherId: voucher._id,
+            code: voucher.code,
             exchangedAt: new Date()
         })
         return { statusCode: 200, success: true, message: 'Exchange voucher successfully' }

@@ -10,21 +10,44 @@ const Product = require('../product/product.schema')
 const Variant = require('../variant/variant.schema')
 const Topping = require('../topping/topping.schema')
 const Voucher = require('../voucher/voucher.schema')
+const UserVoucher = require('../userVoucher/userVoucher.schema')
 
 const orderService = {
-    async createOrder(phoneNumber, data) {
+    async createOrder(phoneNumber, requestBody) {
 
         const user = await AuthMiddleWare.authorize(phoneNumber)
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
+        const voucher = await Voucher.findById(requestBody.voucher)
+        if (!voucher) return { statusCode: 404, success: false, message: 'Create order failed. Voucher not found' }
+
+        if(voucher.type === 'seed'){
+            const exchangeableVoucher = await UserVoucher.findOne({
+                userId: user._id,
+                voucher: voucher._id,
+                used: false
+            })
+            if(!exchangeableVoucher) 
+                return { statusCode: 400, success: false, message: 'Create order failed. Voucher not found' }
+
+        }
         // after authen
         let newOrder = null
+        const status = requestBody.paymentMethod === 'online' ?
+            OrderStatus.AWAITING_PAYMENT.value :
+            OrderStatus.PENDING_CONFIRMATION.value
+
+
         if (user.roles[0] === '681c8c3c5ef65cec792c1056') {// customer create order
-            newOrder = await Order.create({ ...data, owner: user._id })
+            newOrder = await Order.create({ ...requestBody, status, owner: user._id })
         } else { // merchant create order
             const newGuest = await User.create()
-            newOrder = await Order.create({ ...data, owner: newGuest._id })
+            newOrder = await Order.create({ ...requestBody, status, owner: newGuest._id })
+
+           
         }
+
+
 
         return { statusCode: 201, success: true, message: 'Created order successfully', data: newOrder }
     },
@@ -141,14 +164,14 @@ const orderService = {
         if (patchedOrder) {
             // update user's seed if newStatus = 'completed'
             if (requestBody.status === OrderStatus.COMPLETED.value) {
-                const user = await User.findById(patchedOrder.owner).lean()
-                if (!user) return { statusCode: 400, success: false, message: 'User not found' }
-                const updatedSeed = user.seed + Math.round(patchedOrder.totalPrice * 0.00001)
-                const updatedUser = await User.findByIdAndUpdate(patchedOrder.owner, { seed: updatedSeed }, { new: true, runValidators: true })
-                if (updatedUser) {
-                    console.log('Update successfully', updatedUser.seed)
-                }
+                const earnedSeed = Math.round(patchedOrder.totalPrice * 0.00001)
+                await User.findByIdAndUpdate(
+                    patchedOrder.owner,
+                    { $inc: { seed: earnedSeed } },
+                    { new: true }
+                )
             }
+
             const enrichOrder = await this.enrichOrder(patchedOrder, true)
             return { statusCode: 200, success: true, message: 'Update order successfully', data: enrichOrder }
         }
@@ -316,7 +339,7 @@ const orderService = {
         if (mongoose.Types.ObjectId.isValid(id)) {
             const voucherInfo = await Model.findById(id).lean()
             if (voucherInfo) {
-                // console.log('voucherInfo', JSON.stringify(voucherInfo, null, 2))
+
                 return {
                     name: voucherInfo.name,
                     code: voucherInfo.code,
@@ -326,7 +349,6 @@ const orderService = {
                 }
             }
             return null
-
         }
         return null
     },
