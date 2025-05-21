@@ -36,9 +36,9 @@ const orderService = {
             const isExpired = exchangeableVoucher.voucherId.endDate < new Date();
             const isInactive = exchangeableVoucher.voucherId.status === 'inactive';
 
-      
+
             if (isExpired || isInactive) {
-                return { statusCode: 400, success: false, message: 'Tạo đơn thất bại.Voucher is inactive or expired' };
+                return { statusCode: 400, success: false, message: 'Tạo đơn thất bại. Voucher is inactive or expired' };
             }
 
             // pass hết điều kiện voucher thì sẽ dùng voucher này
@@ -46,7 +46,16 @@ const orderService = {
             exchangeableVoucher.usedAt = new Date()
             await exchangeableVoucher.save()
         }
+        // global voucher
+        const isExpired = voucher.endDate < new Date();
+        const isInactive = voucher.status === 'inactive';
 
+        if (isExpired || isInactive) {
+            return { statusCode: 400, success: false, message: 'Tạo đơn thất bại. Voucher is inactive or expired' };
+        }
+
+        // pass hết thì tạo order
+        
         let newOrder = null
         const status = requestBody.paymentMethod === 'online' ?
             OrderStatus.AWAITING_PAYMENT.value :
