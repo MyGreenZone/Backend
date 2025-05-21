@@ -142,7 +142,7 @@ voucherRouter.get('/all', voucherController.getAllVouchers)
  *                   items:
  *                     type: object
  *       401:
- *         description: Không được ủy quyền (Unauthorized)
+ *         description: Unauthorized
  *         content:
  *           application/json:
  *             schema:
@@ -175,8 +175,6 @@ voucherRouter.get('/all', voucherController.getAllVouchers)
  *                   example: Error get my vouchers
  */
 voucherRouter.get('/my-voucher', AuthMiddleWare.authenticateJWT, voucherController.getMyVouchers);
-
-
 
 
 /**

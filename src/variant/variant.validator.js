@@ -16,10 +16,12 @@ const variantValidator = Joi.object({
         .valid('S', 'M', 'L', 'XL')
         .label('Size')
         .messages({
+            'any.required': joiMessages.any.required,
             'any.only': 'Size chỉ được phép là một trong các giá trị: S, M, L, XL',
             'string.empty': joiMessages.string.empty
         }),
     sellingPrice: Joi.number().min(1000).messages({
+        'any.required': joiMessages.any.required,
         'number.min': joiMessages.number.min
     }),
     active: Joi.boolean().messages({
@@ -27,4 +29,9 @@ const variantValidator = Joi.object({
     })
 })
 
-module.exports = variantValidator
+const createVariantValidator = variantValidator.fork(
+    ['password', 'size', 'sellingPrice'],
+    (schema) => schema.required()
+)
+
+module.exports = {variantValidator, createVariantValidator}

@@ -1,8 +1,34 @@
 const mongoose = require('mongoose')
 const variantService = require('./variant.service')
-const variantValidator = require('./variant.validator')
+const { variantValidator, createVariantValidator } = require('./variant.validator')
 
 const variantController = {
+    async createVariant(req, res) {
+        const { productId } = req.params
+        if (!mongoose.Types.ObjectId.isValid(productId)) {
+            return res.status(400).json({ statusCode: 400, success: false, message: 'Sai định dạng productId' })
+        }
+        const { value, error } = createVariantValidator.validate(req.body, { abortEarly: false, convert: false })
+
+        if (error) {
+            const errors = error.details.map(err => {
+                return { statusCode: 400, message: err.message, field: err.context.label }
+            })
+            return res.status(400).json({ statusCode: 400, success: false, error: errors })
+        }
+
+        try {
+            const result = await variantService.createVariant(productId, value, true)
+            return res.status(result.statusCode).json(result)
+        } catch (error) {
+            console.log("Error create variant:", error);
+            return res.status(500).json({
+                statusCode: 500,
+                success: false,
+                message: 'Error create variant',
+            });
+        }
+    },
     async patchVariant(req, res) {
         const { variantId } = req.params
         if (!mongoose.Types.ObjectId.isValid(variantId)) {
