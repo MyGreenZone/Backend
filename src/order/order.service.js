@@ -14,7 +14,6 @@ const UserVoucher = require('../userVoucher/userVoucher.schema')
 
 const orderService = {
     async createOrder(phoneNumber, requestBody) {
-
         const user = await AuthMiddleWare.authorize(phoneNumber)
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
@@ -23,35 +22,35 @@ const orderService = {
         if (!result.success) return result;
 
         const exchangeableVoucher = result.exchangeableVoucher
+
         // pass hết thì tạo order
-
-        let newOrder = null
-        const status = requestBody.paymentMethod === 'online' ?
-            OrderStatus.AWAITING_PAYMENT.value :
-            OrderStatus.PENDING_CONFIRMATION.value
-
-
-        const userRole = user.roles[0].toString()
-        const customerRole = '681c8c3c5ef65cec792c1056'
-        const isCustomer = userRole === customerRole
-
-        if (isCustomer) {// customer create order
-            newOrder = await Order.create({ ...requestBody, status, owner: user._id })
-        } else { // merchant create order
-            const newGuest = await User.create()
-            newOrder = await Order.create({ ...requestBody, status, owner: newGuest._id })
-        }
-
+        const newOrder = await this.setupOrder(user, requestBody);
 
         if (newOrder && exchangeableVoucher) {
             exchangeableVoucher.used = true
             exchangeableVoucher.usedAt = new Date()
             await exchangeableVoucher.save()
         }
-
-
         return { statusCode: 201, success: true, message: 'Created order successfully', data: newOrder }
     },
+
+    async setupOrder(user, requestBody) {
+        const status = requestBody.paymentMethod === 'online'
+            ? OrderStatus.AWAITING_PAYMENT.value
+            : OrderStatus.PENDING_CONFIRMATION.value;
+
+        const userRole = user.roles[0].toString();
+        const customerRole = '681c8c3c5ef65cec792c1056';
+        const isCustomer = userRole === customerRole;
+
+        if (isCustomer) {
+            return await Order.create({ ...requestBody, status, owner: user._id });
+        } else {
+            const newGuest = await User.create();
+            return await Order.create({ ...requestBody, status, owner: newGuest._id });
+        }
+    },
+
 
     async validateVoucher(voucherId, userId) {
         const voucher = await Voucher.findById(voucherId)
