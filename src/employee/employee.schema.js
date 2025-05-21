@@ -2,13 +2,14 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const {MODEL_NAMES} = require('../../constants')
 const employeeSchema = new Schema({
-    firstName: { type: String, require: true },
-    lastName: { type: String, require: true },
-    email: { type: String, require: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    email: { type: String, required: true },
     gender: { type: String },
-    phoneNumber: { type: String, require: true },
-    avatar: { type: String, require: true },
-    workingStore: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.STORE, require: true },
+    phoneNumber: { type: String, required: true },
+    avatar: { type: String, required: true },
+    password: {type: String, required: true, default: '123456' },
+    workingStore: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.STORE, required: true },
 })
 
 const Employee = mongoose.models.Employee || mongoose.model(MODEL_NAMES.EMPLOYEE, employeeSchema);

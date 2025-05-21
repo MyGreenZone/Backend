@@ -1,5 +1,8 @@
 const express = require('express');
-const { sendOtp, verifyOtp, register, getProfile } = require('./auth.controller');
+const authController = require('./auth.controller');
+const AuthMiddleWare = require('../../middleware/auth')
+
+
 /**
  * @swagger
  * components:
@@ -38,7 +41,7 @@ const authRouter = express.Router();
  *       500:
  *         description: Internal server error
  */
-authRouter.post('/otp/send', sendOtp);
+authRouter.post('/otp/send', authController.sendOtp);
 
 
 /**
@@ -74,7 +77,7 @@ authRouter.post('/otp/send', sendOtp);
  *       500:
  *         description: Internal server error
  */
-authRouter.post('/otp/login', verifyOtp);
+authRouter.post('/otp/login', authController.verifyOtp);
 
 
 /**
@@ -108,7 +111,7 @@ authRouter.post('/otp/login', verifyOtp);
  *       500:
  *         description: Lỗi hệ thống
  */
-authRouter.post('/otp/register', register)
+authRouter.post('/otp/register', AuthMiddleWare.authenticateJWT, authController.register)
 
 
 
@@ -187,7 +190,12 @@ authRouter.post('/otp/register', register)
  *       500:
  *         description: Lỗi hệ thống
  */
-authRouter.get('/profile', getProfile);
+authRouter.get('/profile', AuthMiddleWare.authenticateJWT, authController.getProfile);
+
+
+
+
+authRouter.get('/login', authController.employeeLogin);
 
 
 

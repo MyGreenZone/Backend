@@ -1,7 +1,7 @@
 const express = require('express');
 const employeeRouter = express.Router()
-const { createEmployee, getAllEmployees, getEmployeeDetail, updateEmployee, getAvailableEmployees } = require('./employee.controller')
-
+const employeeController = require('./employee.controller')
+const AuthMiddleWare = require('../../middleware/auth')
 
 /**
  * @swagger
@@ -93,7 +93,7 @@ const { createEmployee, getAllEmployees, getEmployeeDetail, updateEmployee, getA
  *       500:
  *         description: Lỗi máy chủ nội bộ
  */
-employeeRouter.post('/create', createEmployee)
+employeeRouter.post('/create', employeeController.createEmployee)
 
 
 /**
@@ -135,7 +135,7 @@ employeeRouter.post('/create', createEmployee)
  *                   type: string
  *                   example: Internal server error
  */
-employeeRouter.get('/all', getAllEmployees)
+employeeRouter.get('/all', employeeController.getAllEmployees)
 
 /**
  * @swagger
@@ -173,7 +173,7 @@ employeeRouter.get('/all', getAllEmployees)
  *       500:
  *         description: Lỗi server
  */
-employeeRouter.get('/:employeeId', getEmployeeDetail)
+employeeRouter.get('/:employeeId', employeeController.getEmployeeDetail)
 
 /**
  * @swagger
@@ -229,7 +229,12 @@ employeeRouter.get('/:employeeId', getEmployeeDetail)
  *       500:
  *         description: Lỗi server
  */
-employeeRouter.put('/:employeeId', updateEmployee);
+employeeRouter.put('/:employeeId', employeeController.updateEmployee)
+
+
+
+
+employeeRouter.get('/available/all', AuthMiddleWare.authenticateJWT, employeeController.getAvailableEmployees);
 
 
 
