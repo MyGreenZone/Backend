@@ -18,6 +18,9 @@ const orderService = {
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
         // after authen
+        const store = await Store.findById(requestBody.store)
+        if (!store) return { statusCode: 404, success: false, message: 'Create order failed. Store not found' }
+
         const result = await this.validateVoucher(requestBody.voucher, user._id);
         if (!result.success) return result;
 
@@ -49,6 +52,18 @@ const orderService = {
             const newGuest = await User.create();
             return await Order.create({ ...requestBody, status, owner: newGuest._id });
         }
+    },
+
+    async checkStoreExists(storeId) {
+        const store = await Store.findById(storeId);
+        if (!store) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Tạo đơn thất bại. Store không tồn tại'
+            };
+        }
+        return null
     },
 
 

@@ -93,6 +93,13 @@ const voucherService = {
             exchangedAt: new Date()
         })
         return { statusCode: 200, success: true, message: 'Exchange voucher successfully' }
+    },
+
+    async getMyVouchers(phoneNumber) {
+        const user = await AuthMiddleWare.authorize(phoneNumber)
+        if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
+        const myVouchers = await UserVoucher.find({ userId: user._id, used: false })
+        return { statusCode: 200, success: true, message: 'Get my vouchers successfully', data: myVouchers }
     }
 
 

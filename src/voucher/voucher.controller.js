@@ -108,6 +108,22 @@ const voucherController = {
                 message: 'Lỗi khi exchange voucher',
             });
         }
+    },
+
+    async getMyVouchers(req, res) {
+        try {
+            const phoneNumber = req.user.phoneNumber
+            const result = await voucherService.getMyVouchers(phoneNumber);
+            return res.status(result.statusCode).json(result);
+
+        } catch (error) {
+            console.log("Error get my vouchers", error);
+            return res.status(500).json({
+                statusCode: 500,
+                success: false,
+                message: 'Error get my vouchers',
+            });
+        }
     }
 }
 

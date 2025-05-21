@@ -112,6 +112,72 @@ voucherRouter.post('/create', voucherController.createVoucher)
 voucherRouter.get('/all', voucherController.getAllVouchers)
 
 
+/**
+ * @swagger
+ * /v1/voucher/my-voucher:
+ *   get:
+ *     summary: Lấy danh sách voucher của người dùng
+ *     tags: [Voucher]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lấy danh sách voucher thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Get my vouchers successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       401:
+ *         description: Không được ủy quyền (Unauthorized)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 401
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Unauthorized
+ *       500:
+ *         description: Lỗi server (Internal Server Error)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 500
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Error get my vouchers
+ */
+voucherRouter.get('/my-voucher', AuthMiddleWare.authenticateJWT, voucherController.getMyVouchers);
+
+
+
 
 /**
  * @swagger
