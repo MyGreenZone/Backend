@@ -41,7 +41,10 @@ const voucherController = {
 
     async getVoucherDetail(req, res) {
         try {
-            const {voucherId} = req.params
+            const { voucherId } = req.params
+            if (!mongoose.Types.ObjectId.isValid(voucherId)) {
+                return res.status(400).json({ statusCode: 400, success: false, message: 'Wrong format voucherId' })
+            }
             const result = await voucherService.getVoucherDetail(voucherId);
             return res.status(result.statusCode).json(result);
         } catch (error) {
@@ -94,7 +97,7 @@ const voucherController = {
 
         try {
             const phoneNumber = req.user.phoneNumber
-            const result = await voucherService.exchangeSeed({voucherId, phoneNumber});
+            const result = await voucherService.exchangeSeed({ voucherId, phoneNumber });
             return res.status(result.statusCode).json(result);
 
         } catch (error) {
