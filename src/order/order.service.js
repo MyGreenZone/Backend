@@ -175,7 +175,7 @@ const orderService = {
             } else if (requestBody.status === OrderStatus.READY_FOR_PICKUP.value &&
                 patchedOrder.deliveryMethod === DeliveryMethod.DELIVERY.value
             ) {
-                const assignResult = await deliveryService.assignDelivery({ employee: requestBody.shipper, order: orderId })
+                const assignResult = await deliveryService.assignDelivery({ employee: requestBody.shipper, order: patchedOrder })
                 if (!assignResult.success) return assignResult
             }
 
