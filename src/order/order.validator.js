@@ -231,8 +231,7 @@ const updateOrderValidator = Joi.object({
 
   shipper: Joi.alternatives().conditional('status', {
     is: Joi.valid('readyForPickup'),
-    then: Joi.string().trim().pattern(KEY.OBJECT_ID_PATTERN).required().messages({
-      'any.required': joiMessages.any.required,
+    then: Joi.string().trim().pattern(KEY.OBJECT_ID_PATTERN).optional().messages({
       'string.empty': joiMessages.string.empty,
       'string.base': joiMessages.string.base,
       'string.pattern.base': 'Field shipper không đúng định dạng ObjectId'

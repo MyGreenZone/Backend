@@ -23,13 +23,14 @@ const orderService = {
         const store = await Store.findById(requestBody.store)
         if (!store) return { statusCode: 404, success: false, message: 'Create order failed. Store not found' }
 
+
         const result = await this.validateVoucher(requestBody.voucher, user._id);
         if (!result.success) return result;
 
         const exchangeableVoucher = result.exchangeableVoucher
 
         // pass hết thì tạo order
-        const newOrder = await this.setupOrder(user, requestBody);
+        const newOrder = await this.setupOrder(user, role, requestBody);
 
         if (newOrder && exchangeableVoucher) {
             exchangeableVoucher.used = true
@@ -142,6 +143,13 @@ const orderService = {
         const user = await AuthMiddleWare.authorize(phoneNumber, role)
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
+        const order = await Order.findById(orderId).lean()
+        if (user.workingStore.toString() !== order.store.toString())
+            return {
+                statusCode: 401,
+                success: false,
+                message: 'Unauthorized. Nhân viên không có quyền update đơn hàng của chi nhánh khác'
+            }
 
         const invalidStatusFlow = await this.validateStatusFlow(orderId, requestBody.status, requestBody)
         if (invalidStatusFlow) return invalidStatusFlow
@@ -190,17 +198,18 @@ const orderService = {
 
     // support functions
 
-    async setupOrder(user, requestBody) {
+    async setupOrder(user, role, requestBody) {
         const status = requestBody.paymentMethod === 'online'
             ? OrderStatus.AWAITING_PAYMENT.value
             : OrderStatus.PENDING_CONFIRMATION.value;
 
-        const isCustomer = !!user.workingStore
+        const isCustomer = role === ROLE.CUSTOMER.value
 
         if (isCustomer) {
             return await Order.create({ ...requestBody, status, owner: user._id });
         } else {
-            const newGuest = await User.create();
+            const newGuest = await User.create({ lastName: 'Khách vãng lai' });
+            if (newGuest) console.log('newGuest', newGuest)
             return await Order.create({ ...requestBody, status, owner: newGuest._id });
         }
     },
@@ -219,38 +228,41 @@ const orderService = {
 
 
     async validateVoucher(voucherId, userId) {
-        const voucher = await Voucher.findById(voucherId)
-        if (!voucher) return { statusCode: 404, success: false, message: 'Create order failed. Voucher not found' }
+        if (voucherId) {
+            const voucher = await Voucher.findById(voucherId)
+            if (!voucher) return { statusCode: 404, success: false, message: 'Create order failed. Voucher not found' }
 
-        const isExpired = voucher.endDate < new Date();
-        const isInactive = voucher.status === 'inactive';
+            const isExpired = voucher.endDate < new Date();
+            const isInactive = voucher.status === 'inactive';
 
-        // Kiểm tra voucher hết hạn hoặc không hoạt động trước
-        if (isExpired || isInactive) {
-            return {
-                statusCode: 400,
-                success: false,
-                message: 'Tạo đơn thất bại. Voucher is inactive or expired'
-            };
-        }
-
-        if (voucher.voucherType === 'seed') {
-            const exchangeableVoucher = await UserVoucher.findOne({
-                userId,
-                voucherId: voucher._id,
-                used: false
-            }).populate('voucherId');
-
-            if (!exchangeableVoucher) {
+            // Kiểm tra voucher hết hạn hoặc không hoạt động trước
+            if (isExpired || isInactive) {
                 return {
                     statusCode: 400,
                     success: false,
-                    message: 'Tạo đơn thất bại. Bạn chưa đổi voucher này. Không thể sử dụng'
+                    message: 'Tạo đơn thất bại. Voucher is inactive or expired'
                 };
             }
 
-            return { success: true, exchangeableVoucher };
+            if (voucher.voucherType === 'seed') {
+                const exchangeableVoucher = await UserVoucher.findOne({
+                    userId,
+                    voucherId: voucher._id,
+                    used: false
+                }).populate('voucherId');
+
+                if (!exchangeableVoucher) {
+                    return {
+                        statusCode: 400,
+                        success: false,
+                        message: 'Tạo đơn thất bại. Khách hàng chưa đổi voucher này. Không thể sử dụng'
+                    };
+                }
+
+                return { success: true, exchangeableVoucher };
+            }
         }
+
 
         // Trường hợp voucher global hoặc các loại khác không cần thêm xử lý
         return { success: true };
@@ -281,6 +293,29 @@ const orderService = {
             return { statusCode: 404, success: false, message: 'Order not found' }
         }
 
+        if (requestBody.status === OrderStatus.READY_FOR_PICKUP.value &&
+            existingOrder.deliveryMethod === DeliveryMethod.PICK_UP.value &&
+            'shipper' in requestBody
+        ) {
+            return {
+                statusCode: 400,
+                success: false,
+                message: `Không truyền shipper cho đơn pickup`
+            }
+        }
+
+        if (requestBody.status === OrderStatus.SHIPPING_ORDER.value &&
+            existingOrder.deliveryMethod === DeliveryMethod.PICK_UP.value
+        ) {
+            return {
+                statusCode: 400,
+                success: false,
+                message: `Cannot update a pickup order to ${newStatus.toUpperCase()}`
+            }
+        }
+
+
+
         const currentOrderStatusPosition = OrderStatus.getPositionByValue(existingOrder.status)
 
         const newOrderStatusPosition = OrderStatus.getPositionByValue(newStatus)
@@ -304,7 +339,10 @@ const orderService = {
             }
         }
 
-        if (existingOrder.status === OrderStatus.PROCESSING.value && newStatus === OrderStatus.READY_FOR_PICKUP.value) {
+        if (existingOrder.status === OrderStatus.PROCESSING.value &&
+            newStatus === OrderStatus.READY_FOR_PICKUP.value &&
+            existingOrder.deliveryMethod === DeliveryMethod.DELIVERY.value
+        ) {
             const shipper = await Employee.findById(requestBody.shipper)
             if (!shipper) return { statusCode: 404, success: false, message: 'Cannot update. Shipper not found' }
         }
