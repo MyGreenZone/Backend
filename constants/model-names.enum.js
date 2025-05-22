@@ -5,6 +5,7 @@ const MODEL_NAMES = Object.freeze({
 
     STORE: 'Store',
     EMPLOYEE: 'Employee',
+    DELIVERY: 'Delivery',
 
     IMAGE: 'Image',
 

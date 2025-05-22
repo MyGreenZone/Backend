@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const { OrderStatus, DeliveryMethod } = require('../../constants')
 const AuthMiddleWare = require('../../middleware/auth')
+const deliveryService = require('../delivery/delivery.service')
 const Order = require('./order.schema')
 const Store = require('../store/store.schema')
 const Employee = require('../employee/employee.schema')
@@ -219,11 +220,20 @@ const orderService = {
             // update user's seed if newStatus = 'completed'
             if (requestBody.status === OrderStatus.COMPLETED.value) {
                 const earnedSeed = Math.round(patchedOrder.totalPrice * 0.0001)
-                await User.findByIdAndUpdate(
-                    patchedOrder.owner,
-                    { $inc: { seed: earnedSeed } },
-                    { new: true }
-                )
+
+                const [updateUserSeed, completeDelivery] = await Promise.all([
+                    User.findByIdAndUpdate(
+                        patchedOrder.owner,
+                        { $inc: { seed: earnedSeed } },
+                        { new: true }
+                    ),
+                    // update delivery
+                    deliveryService.completeDelivery({ employee: requestBody.shipper, order: orderId })
+                ])
+
+            } else if (requestBody.status === OrderStatus.READY_FOR_PICKUP.value) {
+                const assignResult = await deliveryService.assignDelivery({ employee: requestBody.shipper, order: orderId })
+                if (!assignResult.success) return assignResult
             }
 
             const enrichOrder = await this.enrichOrder(patchedOrder, true)

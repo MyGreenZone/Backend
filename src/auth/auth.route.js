@@ -194,7 +194,67 @@ authRouter.get('/profile', AuthMiddleWare.authenticateJWT, authController.getPro
 
 
 
-
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Employee login
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - phoneNumber
+ *               - password
+ *             properties:
+ *               phoneNumber:
+ *                 type: string
+ *                 example: "0333333333"
+ *               password:
+ *                 type: string
+ *                 example: "123456"
+ *     responses:
+ *       200:
+ *         description: Đăng nhập thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Login successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       type: object
+ *                     token:
+ *                       type: object
+ *                       properties:
+ *                         accessToken:
+ *                           type: object
+ *                           properties:
+ *                             token:
+ *                               type: string
+ *                             expiresIn:
+ *                               type: number
+ *                         refreshToken:
+ *                           type: object
+ *                           properties:
+ *                             token:
+ *                               type: string
+ *                             expiresIn:
+ *                               type: number
+ *       400:
+ *         description: Sai số điện thoại hoặc mật khẩu
+ */
 authRouter.post('/login', authController.employeeLogin);
 
 
