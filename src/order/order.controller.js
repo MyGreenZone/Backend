@@ -20,8 +20,8 @@ const orderController = {
         }
 
         try {
-            const phoneNumber = req.user.phoneNumber;
-            const result = await orderService.createOrder(phoneNumber, value);
+            const { phoneNumber, role } = req.user
+            const result = await orderService.createOrder(phoneNumber, role, value);
             return res.status(result.statusCode).json({
                 ...result,
                 timestamp: new Date().toISOString(),
@@ -42,10 +42,10 @@ const orderController = {
 
     async getMyOrders(req, res) {
         try {
-            const phoneNumber = req.user.phoneNumber
+            const { phoneNumber, role } = req.user
 
             const { status } = req.query
-            const result = await orderService.getMyOrders(phoneNumber, status)
+            const result = await orderService.getMyOrders(phoneNumber, role, status)
             return res.status(result.statusCode).json(result)
         } catch (error) {
             console.log('Error get my orders', error)
@@ -60,8 +60,8 @@ const orderController = {
         }
 
         try {
-            const phoneNumber = req.user.phoneNumber
-            const result = await orderService.getOrderDetail(phoneNumber, orderId);
+            const { phoneNumber, role } = req.user
+            const result = await orderService.getOrderDetail(phoneNumber, role, orderId);
             return res.status(result.statusCode).json(result);
         } catch (error) {
             console.log("Error get order detail:", error);
@@ -85,14 +85,14 @@ const orderController = {
         }
 
         try {
-            const phoneNumber = req.user.phoneNumber
+            const { phoneNumber, role } = req.user
 
             const { orderId } = req.params
             if (!orderId) {
                 return res.status(400).json({ statusCode: 500, success: false, message: 'Missing orderId' })
             }
 
-            const result = await orderService.updateOrderStatus(phoneNumber, orderId, validateValue)
+            const result = await orderService.updateOrderStatus(phoneNumber, role, orderId, validateValue)
             return res.status(result.statusCode).json(result)
         } catch (error) {
             console.log('Error update order status', error)
@@ -111,14 +111,14 @@ const orderController = {
         }
 
         try {
-            const phoneNumber = req.user.phoneNumber
+            const { phoneNumber, role } = req.user
 
             const { orderId } = req.params
             if (!orderId) {
                 return res.status(400).json({ statusCode: 500, success: false, message: 'Missing orderId' })
             }
 
-            const result = await orderService.updatePaymentStatus(phoneNumber, orderId, validateValue)
+            const result = await orderService.updatePaymentStatus(phoneNumber, role, orderId, validateValue)
             return res.status(result.statusCode).json(result)
         } catch (error) {
             console.log('Error update payment status', error)

@@ -3,28 +3,14 @@
 const jwt = require('jsonwebtoken');
 const config = require("../configs/envConfig");
 const User = require('../src/auth/user.schema')
-
+const Employee = require('../src/employee/employee.schema')
+const { ROLE } = require('../constants')
 const AuthMiddleWare = (() => {
-
-  const authenticateJWT = (req, res, next) => {
-    const token = req.header('Authorization')?.split(' ')[1];  // Lấy token từ header Authorization
-
+  const verifyToken = (req, res, next) => {
+    const token = req.header('Authorization')?.split(' ')[1];
     if (!token) {
       return res.status(401).json({ message: 'No token provided' });
     }
-
-    jwt.verify(token, config.SECRETKEY, (err, user) => {
-      if (err) {
-        return res.status(403).json({ message: 'Invalid token' });
-      }
-      req.user = user;  // Gắn thông tin người dùng vào request để có thể sử dụng ở các bước tiếp theo
-      next();
-    });
-  };
-
-
-  const verifyToken = (req, res, next) => {
-    const token = req.header('Authorization')?.split(' ')[1];
     try {
       const decoded = jwt.verify(token, config.SECRETKEY)
       console.log('decoded', decoded)
@@ -35,15 +21,17 @@ const AuthMiddleWare = (() => {
     }
   };
 
-  const authorize = async (phoneNumber, Model = User) => {
-    // phoneNumber lấy từ JWT
-    const user = await Model.findOne({ phoneNumber })
-    if (!user) return null
-    return user
-  }
+  const authorize = async (phoneNumber, role) => {
+    console.log('role', role)
+    if (role) {
+      const Model = role === ROLE.CUSTOMER.value ? User : Employee;
+      return await Model.findOne({ phoneNumber });
+    }
+    return null
+  };
+
 
   return {
-    authenticateJWT,
     verifyToken,
     authorize
   }

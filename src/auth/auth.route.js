@@ -111,7 +111,7 @@ authRouter.post('/otp/login', authController.verifyOtp);
  *       500:
  *         description: Lỗi hệ thống
  */
-authRouter.post('/otp/register', AuthMiddleWare.authenticateJWT, authController.register)
+authRouter.post('/otp/register', AuthMiddleWare.verifyToken, authController.register)
 
 
 
@@ -190,7 +190,7 @@ authRouter.post('/otp/register', AuthMiddleWare.authenticateJWT, authController.
  *       500:
  *         description: Lỗi hệ thống
  */
-authRouter.get('/profile', AuthMiddleWare.authenticateJWT, authController.getProfile);
+authRouter.get('/profile', AuthMiddleWare.verifyToken, authController.getProfile);
 
 
 

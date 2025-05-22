@@ -6,7 +6,7 @@ const Order = require('./order.schema')
 const Store = require('../store/store.schema')
 const Employee = require('../employee/employee.schema')
 const User = require('../auth/user.schema')
-
+const { ROLE } = require('../../constants')
 const Product = require('../product/product.schema')
 const Variant = require('../variant/variant.schema')
 const Topping = require('../topping/topping.schema')
@@ -15,8 +15,8 @@ const UserVoucher = require('../userVoucher/userVoucher.schema')
 
 const orderService = {
     // main services
-    async createOrder(phoneNumber, requestBody) {
-        const user = await AuthMiddleWare.authorize(phoneNumber)
+    async createOrder(phoneNumber, role, requestBody) {
+        const user = await AuthMiddleWare.authorize(phoneNumber, role)
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
         // after authen
@@ -39,10 +39,11 @@ const orderService = {
         return { statusCode: 201, success: true, message: 'Created order successfully', data: newOrder }
     },
 
-    async getMyOrders(phoneNumber, status) {
+    async getMyOrders(phoneNumber, role, status) {
 
         // authen
-        const user = await AuthMiddleWare.authorize(phoneNumber)
+        if (role !== ROLE.CUSTOMER.value) return { statusCode: 401, success: false, message: 'Unauthorized' }
+        const user = await AuthMiddleWare.authorize(phoneNumber, role)
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
         // after authen successfully
@@ -66,12 +67,12 @@ const orderService = {
         return { statusCode: 200, success: true, message: 'Get my orders successfully', data: responseData }
     },
 
-    async getOrderDetail(phoneNumber, orderId, enableToppingItem = true) {
+    async getOrderDetail(phoneNumber, role, orderId, enableToppingItem = true) {
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
             return { statusCode: 400, success: false, message: 'Invalid orderId' };
         }
         // authen
-        const user = await AuthMiddleWare.authorize(phoneNumber)
+        const user = await AuthMiddleWare.authorize(phoneNumber, role)
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
         const order = await Order.findById(orderId).lean()
@@ -83,12 +84,12 @@ const orderService = {
         return { statusCode: 200, success: true, message: 'Get order detail successfully', data: enrichOrder }
     },
 
-    async updatePaymentStatus(phoneNumber, orderId, requestBody) {
+    async updatePaymentStatus(phoneNumber, role, orderId, requestBody) {
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
             return { statusCode: 400, success: false, message: 'Wrong format orderId' }
         }
 
-        const user = await AuthMiddleWare.authorize(phoneNumber)
+        const user = await AuthMiddleWare.authorize(phoneNumber, role)
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
         const existingOrder = await Order.findById(orderId).lean()
@@ -131,12 +132,14 @@ const orderService = {
     },
 
 
-    async updateOrderStatus(phoneNumber, orderId, requestBody) {
+    async updateOrderStatus(phoneNumber, role, orderId, requestBody) {
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
             return { statusCode: 400, success: false, message: 'Wrong format orderId' }
         }
 
-        const user = await AuthMiddleWare.authorize(phoneNumber)
+        if (role === ROLE.CUSTOMER.value && requestBody.status !== OrderStatus.CANCELLED.value)
+            return { statusCode: 401, success: false, message: 'Unauthorized' }
+        const user = await AuthMiddleWare.authorize(phoneNumber, role)
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
 
@@ -192,9 +195,7 @@ const orderService = {
             ? OrderStatus.AWAITING_PAYMENT.value
             : OrderStatus.PENDING_CONFIRMATION.value;
 
-        const userRole = user.roles[0].toString();
-        const customerRole = '681c8c3c5ef65cec792c1056';
-        const isCustomer = userRole === customerRole;
+        const isCustomer = !!user.workingStore
 
         if (isCustomer) {
             return await Order.create({ ...requestBody, status, owner: user._id });

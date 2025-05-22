@@ -205,7 +205,7 @@ orderRouter.get('/my-order', orderController.getMyOrders);
  *       500:
  *         description: Lỗi server nội bộ
  */
-orderRouter.get('/:orderId', AuthMiddleWare.authenticateJWT, orderController.getOrderDetail);
+orderRouter.get('/:orderId', AuthMiddleWare.verifyToken, orderController.getOrderDetail);
 
 
 /**
@@ -277,7 +277,7 @@ orderRouter.get('/:orderId', AuthMiddleWare.authenticateJWT, orderController.get
  *       500:
  *         description: Lỗi server
  */
-orderRouter.patch('/:orderId/status', AuthMiddleWare.authenticateJWT, orderController.updateOrderStatus);
+orderRouter.patch('/:orderId/status', AuthMiddleWare.verifyToken, orderController.updateOrderStatus);
 
 
 /**
@@ -345,7 +345,7 @@ orderRouter.patch('/:orderId/status', AuthMiddleWare.authenticateJWT, orderContr
  *       500:
  *         description: Lỗi server
  */
-orderRouter.patch('/:orderId/payment', AuthMiddleWare.authenticateJWT, orderController.updatePaymentStatus);
+orderRouter.patch('/:orderId/payment', AuthMiddleWare.verifyToken, orderController.updatePaymentStatus);
 
 
 

@@ -174,7 +174,7 @@ voucherRouter.get('/all', voucherController.getAllVouchers)
  *                   type: string
  *                   example: Error get my vouchers
  */
-voucherRouter.get('/my-voucher', AuthMiddleWare.authenticateJWT, voucherController.getMyVouchers);
+voucherRouter.get('/my-voucher', AuthMiddleWare.verifyToken, voucherController.getMyVouchers);
 
 
 /**
@@ -265,7 +265,7 @@ voucherRouter.get('/:voucherId', voucherController.getVoucherDetail)
 voucherRouter.put('/:voucherId', voucherController.updateVoucher)
 
 
-voucherRouter.put('/exchange/:voucherId', AuthMiddleWare.authenticateJWT, voucherController.exchangeSeed)/**
+voucherRouter.put('/exchange/:voucherId', AuthMiddleWare.verifyToken, voucherController.exchangeSeed)/**
  * @swagger
  * /v1/voucher/exchange/{voucherId}:
  *   put:
@@ -306,7 +306,7 @@ voucherRouter.put('/exchange/:voucherId', AuthMiddleWare.authenticateJWT, vouche
  */
 voucherRouter.put(
   '/exchange/:voucherId',
-  AuthMiddleWare.authenticateJWT,
+  AuthMiddleWare.verifyToken,
   voucherController.exchangeSeed
 );
 

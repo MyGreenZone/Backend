@@ -19,8 +19,7 @@ const userSchema = new Schema({
     }
   },
   firstName: { type: String, default: null },
-  lastName: { type: String, default: 'Khách vãng lai' },
-  roles: [{ type: Schema.Types.ObjectId, ref: MODEL_NAMES.ROLE }]
+  lastName: { type: String, default: 'Khách vãng lai' }
 });
 
 

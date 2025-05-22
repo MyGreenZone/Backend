@@ -96,8 +96,8 @@ const voucherController = {
         }
 
         try {
-            const phoneNumber = req.user.phoneNumber
-            const result = await voucherService.exchangeSeed({ voucherId, phoneNumber });
+            const { phoneNumber, role } = req.user
+            const result = await voucherService.exchangeSeed({ voucherId, phoneNumber, role });
             return res.status(result.statusCode).json(result);
 
         } catch (error) {
@@ -112,8 +112,8 @@ const voucherController = {
 
     async getMyVouchers(req, res) {
         try {
-            const phoneNumber = req.user.phoneNumber
-            const result = await voucherService.getMyVouchers(phoneNumber);
+            const { phoneNumber, role } = req.user
+            const result = await voucherService.getMyVouchers(phoneNumber, role);
             return res.status(result.statusCode).json(result);
 
         } catch (error) {

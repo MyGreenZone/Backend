@@ -11,7 +11,6 @@ const swaggerDocument = require('../configs/swaggerConfig');
 
 
 require("./auth/user.schema")
-require("./role/role.schema")
 require("./otp/otp.schema")
 require("./store/store.schema")
 require("./image/image.schema")

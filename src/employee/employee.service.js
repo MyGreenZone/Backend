@@ -1,16 +1,13 @@
 const Employee = require('../employee/employee.schema')
-const Order = require('../order/order.schema')
-const OrderStatus = require('../../constants/orderStatus.enum')
 const Delivery = require('../delivery/delivery.schema')
-const Store = require('../store/store.schema')
-const mongoose = require('mongoose')
-const { KEY } = require('../../constants')
+const { ROLE } = require('../../constants')
 const AuthMiddleWare = require('../../middleware/auth')
 
 const employeeService = {
-   async getAvailableEmployees(phoneNumber) {
+   async getAvailableEmployees(phoneNumber, role) {
       // authorize 
-      const user = await AuthMiddleWare.authorize(phoneNumber, Employee)
+      if (role === ROLE.CUSTOMER.value) return { statusCode: 401, success: false, message: 'Unauthorized' }
+      const user = await AuthMiddleWare.authorize(phoneNumber, role)
       if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
       const busyEmployees = await Delivery.find({ isCompleted: false }).distinct('employee')

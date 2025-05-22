@@ -289,7 +289,7 @@ employeeRouter.put('/:employeeId', employeeController.updateEmployee)
  */
 employeeRouter.get(
     '/available/all',
-    AuthMiddleWare.authenticateJWT,
+    AuthMiddleWare.verifyToken,
     employeeController.getAvailableEmployees
 );
 

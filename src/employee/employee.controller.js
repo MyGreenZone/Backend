@@ -158,8 +158,8 @@ const employeeController = {
 
     async getAvailableEmployees(req, res) {
         try {
-            const phoneNumber = req.user.phoneNumber
-            const result = await employeeService.getAvailableEmployees(phoneNumber);
+            const {phoneNumber, role} = req.user
+            const result = await employeeService.getAvailableEmployees(phoneNumber, role);
             return res.status(result.statusCode).json(result);
 
         } catch (error) {

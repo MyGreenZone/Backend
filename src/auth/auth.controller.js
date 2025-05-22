@@ -3,6 +3,7 @@
 const User = require('./user.schema')
 const Otp = require('../otp/otp.schema')
 const authService = require('./auth.service')
+const { ROLE } = require('../../constants')
 const jwt = require('jsonwebtoken');
 const config = require("../../configs/envConfig");
 const { employeeLoginValidator } = require('./auth.validator')
@@ -74,7 +75,7 @@ const authController = {
         return res.status(400).json({ success: false, message: 'Phone number and code are required' });
       }
 
-      const user = await User.findOne({ phoneNumber }).populate('roles');
+      const user = await User.findOne({ phoneNumber });
       if (!user) {
         return res.status(404).json({ success: false, message: 'User not found' });
       }
@@ -95,7 +96,12 @@ const authController = {
 
       // Tạo token
       const accessToken = jwt.sign(
-        { typeToken: 'accessToken', phoneNumber },
+        {
+          typeToken: 'accessToken',
+          id: user._id,
+          phoneNumber,
+          role: ROLE.CUSTOMER.value
+        },
         config.SECRETKEY,
         { expiresIn: '10d' } // 864000s
       );

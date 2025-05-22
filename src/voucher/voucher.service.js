@@ -1,6 +1,7 @@
 const Voucher = require('./voucher.schema')
 const UserVoucher = require('../userVoucher/userVoucher.schema')
 const AuthMiddleWare = require('../../middleware/auth')
+const { ROLE } = require('../../constants')
 const voucherService = {
     async createVoucher(data) {
         const { code } = data
@@ -51,9 +52,10 @@ const voucherService = {
         };
     },
 
-    async exchangeSeed({ voucherId, phoneNumber }) {
+    async exchangeSeed({ voucherId, phoneNumber, role }) {
 
-        const user = await AuthMiddleWare.authorize(phoneNumber)
+        if (role !== ROLE.CUSTOMER.value) return { statusCode: 401, success: false, message: 'Unauthorized' }
+        const user = await AuthMiddleWare.authorize(phoneNumber, role)
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
 
@@ -95,8 +97,9 @@ const voucherService = {
         return { statusCode: 200, success: true, message: 'Exchange voucher successfully' }
     },
 
-    async getMyVouchers(phoneNumber) {
-        const user = await AuthMiddleWare.authorize(phoneNumber)
+    async getMyVouchers(phoneNumber, role) {
+        if (role !== ROLE.CUSTOMER.value) return { statusCode: 401, success: false, message: 'Unauthorized' }
+        const user = await AuthMiddleWare.authorize(phoneNumber, role)
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
         const myVouchers = await UserVoucher.find({ userId: user._id, used: false })
         return { statusCode: 200, success: true, message: 'Get my vouchers successfully', data: myVouchers }
