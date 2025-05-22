@@ -234,7 +234,65 @@ employeeRouter.put('/:employeeId', employeeController.updateEmployee)
 
 
 
-employeeRouter.get('/available/all', AuthMiddleWare.authenticateJWT, employeeController.getAvailableEmployees);
+/**
+ * @swagger
+ * /v1/employee/available/all:
+ *   get:
+ *     summary: Get available employees of the current employee's store
+ *     description: Returns a list of employees who are currently not assigned to any active delivery in the same store as the requester.
+ *     tags:
+ *       - Employee
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Get available employees successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Get available employees successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: "682ee67ab85ae23b12e82954"
+ *                       firstName:
+ *                         type: string
+ *                         example: "Phong"
+ *                       lastName:
+ *                         type: string
+ *                         example: "Tô Ký"
+ *                       phoneNumber:
+ *                         type: string
+ *                         example: "0444444444"
+ *                       avatar:
+ *                         type: string
+ *                         example: "https://example.com/avatar.jpg"
+ *                       workingStore:
+ *                         type: string
+ *                         example: "681e169cfe10c1d049a52710"
+ *       401:
+ *         description: Unauthorized
+ */
+employeeRouter.get(
+    '/available/all',
+    AuthMiddleWare.authenticateJWT,
+    employeeController.getAvailableEmployees
+);
+
 
 
 

@@ -163,11 +163,11 @@ const employeeController = {
             return res.status(result.statusCode).json(result);
 
         } catch (error) {
-            console.log("Error get my vouchers", error);
+            console.log("Error get available employees", error);
             return res.status(500).json({
                 statusCode: 500,
                 success: false,
-                message: 'Error get my vouchers',
+                message: 'Error get available employees',
             });
         }
     }

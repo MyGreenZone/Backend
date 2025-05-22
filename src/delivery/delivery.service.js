@@ -13,7 +13,6 @@ const deliveryService = {
         if (busy)
             return { statusCode: 400, success: false, message: 'This employee is busy now' }
 
-
         // after check
         const newDelivery = await Delivery.create({ employee: employeeId, order: order._id })
         return { statusCode: 201, success: true, message: 'Create delivery successfully', data: newDelivery }
@@ -31,11 +30,9 @@ const deliveryService = {
         }
         return { statusCode: 404, success: false, message: 'Update failed. Cannot find delivery' }
 
-    },
-
-    async getAvailableEmployees() {
-        const availableEmpoyees = await Delivery.find({ isCompleted: true }).distinct('employee')
     }
+
+   
 }
 
 module.exports = deliveryService
