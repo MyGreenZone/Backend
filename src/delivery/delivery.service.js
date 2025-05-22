@@ -24,6 +24,10 @@ const deliveryService = {
         }
         return {statusCode: 404, success: false, message: 'Update failed. Cannot find delivery'}
 
+    },
+
+    async getAvailableEmployees(){
+        const availableEmpoyees = await Delivery.find({isCompleted: true }).distinct('employee')
     }
 }
 

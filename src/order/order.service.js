@@ -14,6 +14,7 @@ const Voucher = require('../voucher/voucher.schema')
 const UserVoucher = require('../userVoucher/userVoucher.schema')
 
 const orderService = {
+    // main services
     async createOrder(phoneNumber, requestBody) {
         const user = await AuthMiddleWare.authorize(phoneNumber)
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
@@ -37,75 +38,6 @@ const orderService = {
         }
         return { statusCode: 201, success: true, message: 'Created order successfully', data: newOrder }
     },
-
-    async setupOrder(user, requestBody) {
-        const status = requestBody.paymentMethod === 'online'
-            ? OrderStatus.AWAITING_PAYMENT.value
-            : OrderStatus.PENDING_CONFIRMATION.value;
-
-        const userRole = user.roles[0].toString();
-        const customerRole = '681c8c3c5ef65cec792c1056';
-        const isCustomer = userRole === customerRole;
-
-        if (isCustomer) {
-            return await Order.create({ ...requestBody, status, owner: user._id });
-        } else {
-            const newGuest = await User.create();
-            return await Order.create({ ...requestBody, status, owner: newGuest._id });
-        }
-    },
-
-    async checkStoreExists(storeId) {
-        const store = await Store.findById(storeId);
-        if (!store) {
-            return {
-                statusCode: 404,
-                success: false,
-                message: 'Tạo đơn thất bại. Store không tồn tại'
-            };
-        }
-        return null
-    },
-
-
-    async validateVoucher(voucherId, userId) {
-        const voucher = await Voucher.findById(voucherId)
-        if (!voucher) return { statusCode: 404, success: false, message: 'Create order failed. Voucher not found' }
-
-        const isExpired = voucher.endDate < new Date();
-        const isInactive = voucher.status === 'inactive';
-
-        // Kiểm tra voucher hết hạn hoặc không hoạt động trước
-        if (isExpired || isInactive) {
-            return {
-                statusCode: 400,
-                success: false,
-                message: 'Tạo đơn thất bại. Voucher is inactive or expired'
-            };
-        }
-
-        if (voucher.voucherType === 'seed') {
-            const exchangeableVoucher = await UserVoucher.findOne({
-                userId,
-                voucherId: voucher._id,
-                used: false
-            }).populate('voucherId');
-
-            if (!exchangeableVoucher) {
-                return {
-                    statusCode: 400,
-                    success: false,
-                    message: 'Tạo đơn thất bại. Bạn chưa đổi voucher này. Không thể sử dụng'
-                };
-            }
-
-            return { success: true, exchangeableVoucher };
-        }
-
-        // Trường hợp voucher global hoặc các loại khác không cần thêm xử lý
-        return { success: true };
-    },
-
 
     async getMyOrders(phoneNumber, status) {
 
@@ -217,21 +149,32 @@ const orderService = {
 
 
         if (patchedOrder) {
+            // console.log(['patchedOrder', JSON.stringify(patchedOrder, null, 2)])
             // update user's seed if newStatus = 'completed'
             if (requestBody.status === OrderStatus.COMPLETED.value) {
                 const earnedSeed = Math.round(patchedOrder.totalPrice * 0.0001)
 
-                const [updateUserSeed, completeDelivery] = await Promise.all([
+                const promises = [
                     User.findByIdAndUpdate(
                         patchedOrder.owner,
                         { $inc: { seed: earnedSeed } },
                         { new: true }
-                    ),
-                    // update delivery
-                    deliveryService.completeDelivery({ employee: requestBody.shipper, order: orderId })
-                ])
+                    )
+                ];
 
-            } else if (requestBody.status === OrderStatus.READY_FOR_PICKUP.value) {
+
+                if (patchedOrder.deliveryMethod === DeliveryMethod.DELIVERY.value) {
+                    promises.push(
+                        deliveryService.completeDelivery({ employee: patchedOrder.shipper, order: orderId })
+                    );
+                }
+
+                await Promise.all(promises);
+
+
+            } else if (requestBody.status === OrderStatus.READY_FOR_PICKUP.value &&
+                patchedOrder.deliveryMethod === DeliveryMethod.DELIVERY.value
+            ) {
                 const assignResult = await deliveryService.assignDelivery({ employee: requestBody.shipper, order: orderId })
                 if (!assignResult.success) return assignResult
             }
@@ -240,6 +183,76 @@ const orderService = {
             return { statusCode: 200, success: true, message: 'Update order successfully', data: enrichOrder }
         }
         return { statusCode: 500, success: false, message: 'Failed to update order' }
+    },
+
+    // support functions
+
+    async setupOrder(user, requestBody) {
+        const status = requestBody.paymentMethod === 'online'
+            ? OrderStatus.AWAITING_PAYMENT.value
+            : OrderStatus.PENDING_CONFIRMATION.value;
+
+        const userRole = user.roles[0].toString();
+        const customerRole = '681c8c3c5ef65cec792c1056';
+        const isCustomer = userRole === customerRole;
+
+        if (isCustomer) {
+            return await Order.create({ ...requestBody, status, owner: user._id });
+        } else {
+            const newGuest = await User.create();
+            return await Order.create({ ...requestBody, status, owner: newGuest._id });
+        }
+    },
+
+    async checkStoreExists(storeId) {
+        const store = await Store.findById(storeId);
+        if (!store) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Tạo đơn thất bại. Store không tồn tại'
+            };
+        }
+        return null
+    },
+
+
+    async validateVoucher(voucherId, userId) {
+        const voucher = await Voucher.findById(voucherId)
+        if (!voucher) return { statusCode: 404, success: false, message: 'Create order failed. Voucher not found' }
+
+        const isExpired = voucher.endDate < new Date();
+        const isInactive = voucher.status === 'inactive';
+
+        // Kiểm tra voucher hết hạn hoặc không hoạt động trước
+        if (isExpired || isInactive) {
+            return {
+                statusCode: 400,
+                success: false,
+                message: 'Tạo đơn thất bại. Voucher is inactive or expired'
+            };
+        }
+
+        if (voucher.voucherType === 'seed') {
+            const exchangeableVoucher = await UserVoucher.findOne({
+                userId,
+                voucherId: voucher._id,
+                used: false
+            }).populate('voucherId');
+
+            if (!exchangeableVoucher) {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Tạo đơn thất bại. Bạn chưa đổi voucher này. Không thể sử dụng'
+                };
+            }
+
+            return { success: true, exchangeableVoucher };
+        }
+
+        // Trường hợp voucher global hoặc các loại khác không cần thêm xử lý
+        return { success: true };
     },
 
     extractPatchedData(requestBody) {
