@@ -5,6 +5,7 @@ const Otp = require('../otp/otp.schema')
 const authService = require('./auth.service')
 const jwt = require('jsonwebtoken');
 const config = require("../../configs/envConfig");
+const { employeeLoginValidator } = require('./auth.validator')
 const generateOtpCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 const authController = {
@@ -113,11 +114,11 @@ const authController = {
           token: {
             accessToken: {
               token: accessToken,
-              expiresIn: '864000s'
+              expiresIn: 864000
             },
             refreshToken: {
               token: refreshToken,
-              expiresIn: '2592000s'
+              expiresIn: 2592000
             }
           }
         }
@@ -250,8 +251,39 @@ const authController = {
   },
 
 
-  async employeeLogin(req, res){
-    
+  async employeeLogin(req, res) {
+    const { value, error } = employeeLoginValidator.validate(req.body, { abortEarly: false, convert: false });
+    if (error) {
+      const errors = error.details.map(err => ({
+        message: err.message,
+        field: err.context.label
+      }));
+      return res.status(400).json({
+        statusCode: 400,
+        success: false,
+        error: errors,
+        timestamp: new Date().toISOString(),
+        path: req.originalUrl
+      });
+    }
+    try {
+
+      const result = await authService.employeeLogin(value)
+      return res.status(result.statusCode).json({
+        ...result,
+        timestamp: new Date().toISOString(),
+        path: req.originalUrl
+      })
+    } catch (error) {
+      console.log('Employee login error', error);
+      return res.status(500).json({
+        statusCode: 500,
+        success: false,
+        message: `Employee login error ${error}`,
+        timestamp: new Date().toISOString(),
+        path: req.originalUrl
+      });
+    }
   }
 
 

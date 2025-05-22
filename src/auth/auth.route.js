@@ -195,7 +195,7 @@ authRouter.get('/profile', AuthMiddleWare.authenticateJWT, authController.getPro
 
 
 
-authRouter.get('/login', authController.employeeLogin);
+authRouter.post('/login', authController.employeeLogin);
 
 
 

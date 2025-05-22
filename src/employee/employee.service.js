@@ -6,7 +6,7 @@ const AuthMiddleWare = require('../../middleware/auth')
 
 const employeeService = {
    async getAvailableEmployees(phoneNumber) {
-      const user = await AuthMiddleWare.authorize(phoneNumber)
+      const user = await AuthMiddleWare.authorize(phoneNumber, Employee)
       if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
       const employees = await Employee.find()
