@@ -220,7 +220,7 @@ const createOrderValidator = Joi.object({
 const updateOrderValidator = Joi.object({
   status: Joi.string().trim()
     .required()
-    .valid(...OrderStatus.getValues())
+    .valid(...OrderStatus.enableUpdateValues())
     .messages({
       'any.required': joiMessages.any.required,
       'any.only': joiMessages.any.only,

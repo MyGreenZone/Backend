@@ -6,7 +6,7 @@ const deliveryService = {
     async assignDelivery(employeeId, order) {
         const employeeInfo = await Employee.findById(employeeId).lean()
 
-        if (employeeInfo.workingStore !== order.store)
+        if (employeeInfo.workingStore.toString() !== order.store.toString())
             return { statusCode: 400, success: false, message: 'Cannot assign an employee besides store' }
         // check busy
         const busy = await Delivery.findOne({ employee: employeeId, isCompleted: false })
@@ -19,12 +19,14 @@ const deliveryService = {
     },
 
     async completeDelivery(data) {
-        const { employee, order } = data
+        const { employee, order, success } = data
         const delivery = await Delivery.findOne({ employee, order, isCompleted: false })
 
 
         if (delivery) {
             delivery.isCompleted = true
+            delivery.completedAt = new Date()
+            delivery.success = success
             await delivery.save()
             return { statusCode: 200, success: true, message: 'Completed delivery successfully', data: delivery }
         }
@@ -32,7 +34,7 @@ const deliveryService = {
 
     }
 
-   
+
 }
 
 module.exports = deliveryService

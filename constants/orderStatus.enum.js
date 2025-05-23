@@ -30,6 +30,16 @@ const OrderStatus = Object.freeze({
             this.FAILED_DELIVERY.value
         ]
     },
+    enableUpdateValues() {
+        return [
+            this.PROCESSING.value,
+            this.READY_FOR_PICKUP.value,
+            this.SHIPPING_ORDER.value,
+            this.COMPLETED.value,
+            this.CANCELLED.value,
+            this.FAILED_DELIVERY.value
+        ]
+    },
     getValues() {
         return [
             this.AWAITING_PAYMENT.value,

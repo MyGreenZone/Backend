@@ -6,7 +6,9 @@ const { MODEL_NAMES } = require('../../constants')
 const deliverySchema = new Schema({
     employee: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.EMPLOYEE, required: true },
     order: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.ORDER, required: true },
-    isCompleted: { type: Boolean, required: true, default: false }
+    isCompleted: { type: Boolean, required: true, default: false },
+    completedAt: { type: Date },
+    success: { type: Boolean }
 }, { timestamps: true });
 
 

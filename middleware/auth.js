@@ -13,7 +13,7 @@ const AuthMiddleWare = (() => {
     }
     try {
       const decoded = jwt.verify(token, config.SECRETKEY)
-      // console.log('decoded', decoded)
+      console.log('decoded', decoded)
       req.user = decoded
       next()
     } catch (error) {
@@ -22,7 +22,7 @@ const AuthMiddleWare = (() => {
   };
 
   const authorize = async (phoneNumber, role) => {
-    // console.log('role', role)
+    console.log('role', role)
     if (role) {
       const Model = role === ROLE.CUSTOMER.value ? User : Employee;
       return await Model.findOne({ phoneNumber });

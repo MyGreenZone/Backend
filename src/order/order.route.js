@@ -213,7 +213,7 @@ orderRouter.get('/:orderId', AuthMiddleWare.verifyToken, orderController.getOrde
  * /v1/order/{orderId}/status:
  *   patch:
  *     summary: Cập nhật trạng thái đơn hàng
- *     description: (status) awaitingPayment -> pendingConfirmation -> processing -> readyForPickup -> shippingOrder -> completed / cancelled / failedDelivery
+ *     description: (avaiable status) processing -> readyForPickup -> shippingOrder -> completed / cancelled / failedDelivery
  *     tags:
  *       - Order
  *     security:

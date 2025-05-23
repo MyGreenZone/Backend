@@ -150,6 +150,13 @@ const orderService = {
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
 
         const order = await Order.findById(orderId).lean()
+        if (!order) return { statusCode: 404, success: false, message: 'Order not found' }
+        if (role === ROLE.CUSTOMER.value &&
+            requestBody.status === OrderStatus.CANCELLED.value &&
+            !['awaitingPayment', 'pendingConfirmation'].includes(order.status)
+        )
+            return { statusCode: 400, success: false, message: 'Đơn hàng đang tiến hành, khách hàng không thể hủy' }
+        // console.log('order', JSON.stringify(order, null, 2))
         if (user.workingStore.toString() !== order.store.toString())
             return {
                 statusCode: 401,
@@ -161,6 +168,14 @@ const orderService = {
         if (invalidStatusFlow) return invalidStatusFlow
 
         const patchedData = this.extractPatchedData(requestBody)
+
+        if (requestBody.status === OrderStatus.READY_FOR_PICKUP.value &&
+            order.deliveryMethod === DeliveryMethod.DELIVERY.value
+        ) {
+            const assignResult = await deliveryService.assignDelivery(requestBody.shipper, order)
+            if (!assignResult.success) return assignResult
+        }
+
 
         const patchedOrder = await Order.findByIdAndUpdate(orderId, patchedData, { new: true, runValidators: true }).lean()
 
@@ -182,18 +197,13 @@ const orderService = {
 
                 if (patchedOrder.deliveryMethod === DeliveryMethod.DELIVERY.value) {
                     promises.push(
-                        deliveryService.completeDelivery({ employee: patchedOrder.shipper, order: orderId })
+                        deliveryService.completeDelivery({ employee: patchedOrder.shipper, order: orderId, success: true })
                     );
                 }
-
                 await Promise.all(promises);
 
-
-            } else if (requestBody.status === OrderStatus.READY_FOR_PICKUP.value &&
-                patchedOrder.deliveryMethod === DeliveryMethod.DELIVERY.value
-            ) {
-                const assignResult = await deliveryService.assignDelivery({ employee: requestBody.shipper, order: patchedOrder })
-                if (!assignResult.success) return assignResult
+            } else if (OrderStatus.getCancelledValues().includes(requestBody.status)) {
+                await deliveryService.completeDelivery({ employee: patchedOrder.shipper, order: orderId, success: false })
             }
 
             const enrichOrder = await this.enrichOrder(patchedOrder, true)
@@ -283,7 +293,8 @@ const orderService = {
             case OrderStatus.READY_FOR_PICKUP.value: {
                 return {
                     status: requestBody.status,
-                    readyForPickupAt: new Date()
+                    readyForPickupAt: new Date(),
+                    shipper: requestBody.shipper
                 }
             }
             case OrderStatus.SHIPPING_ORDER.value: {
@@ -372,8 +383,13 @@ const orderService = {
             newStatus === OrderStatus.READY_FOR_PICKUP.value &&
             existingOrder.deliveryMethod === DeliveryMethod.DELIVERY.value
         ) {
-            const shipper = await Employee.findById(requestBody.shipper)
-            if (!shipper) return { statusCode: 404, success: false, message: 'Cannot update. Shipper not found' }
+            if ('shipper' in requestBody) {
+                const shipper = await Employee.findById(requestBody.shipper)
+                if (!shipper) return { statusCode: 404, success: false, message: 'Cannot update. Shipper not found' }
+            } else {
+                return { statusCode: 400, success: false, message: 'Field shipper is required' }
+            }
+
         }
 
 
