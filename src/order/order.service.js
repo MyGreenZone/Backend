@@ -130,11 +130,10 @@ const orderService = {
 
 
         if (patchedOrder) {
-
-
             const enrichOrder = await this.enrichOrder(patchedOrder, true)
+            const responseData = this.formatTimelines(enrichOrder)
 
-            return { statusCode: 200, success: true, message: 'Update order successfully', data: enrichOrder }
+            return { statusCode: 200, success: true, message: 'Update order successfully', data: responseData }
         }
         return { statusCode: 500, success: false, message: 'Failed to update order' }
     },
@@ -198,7 +197,8 @@ const orderService = {
             }
 
             const enrichOrder = await this.enrichOrder(patchedOrder, true)
-            return { statusCode: 200, success: true, message: 'Update order successfully', data: enrichOrder }
+            const responseData = this.formatTimelines(enrichOrder)
+            return { statusCode: 200, success: true, message: 'Update order successfully', data: responseData }
         }
         return { statusCode: 500, success: false, message: 'Failed to update order' }
     },
