@@ -21,11 +21,11 @@ const orderSchema = new Schema({
     latitude: { type: String },
     longitude: { type: String },
 
-    pendingConfirmationAt: { type: Date },
-    readyForPickupAt: { type: Date },
-    shippingOrderAt: { type: Date },
-    completedAt: { type: Date },
-    cancelledAt: { type: Date },
+    pendingConfirmationAt: { type: Date, default: null },
+    readyForPickupAt: { type: Date, default: null },
+    shippingOrderAt: { type: Date, default: null },
+    completedAt: { type: Date, default: null },
+    cancelledAt: { type: Date, default: null },
 
     owner: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.USER, default: null },
     shipper: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.EMPLOYEE, default: null },

@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const { OrderStatus, DeliveryMethod } = require('../../constants')
 const AuthMiddleWare = require('../../middleware/auth')
 const deliveryService = require('../delivery/delivery.service')
+const { toVietnamTime } = require('../../utils/timeUtils')
 const Order = require('./order.schema')
 const Store = require('../store/store.schema')
 const Employee = require('../employee/employee.schema')
@@ -82,7 +83,9 @@ const orderService = {
 
         const enrichOrder = await this.enrichOrder(order, enableToppingItem)
 
-        return { statusCode: 200, success: true, message: 'Get order detail successfully', data: enrichOrder }
+        const responseData = this.formatTimelines(enrichOrder)
+
+        return { statusCode: 200, success: true, message: 'Get order detail successfully', data: responseData }
     },
 
     async updatePaymentStatus(phoneNumber, role, orderId, requestBody) {
@@ -110,7 +113,11 @@ const orderService = {
         }
 
         const patchedData = requestBody.paymentStatus === 'success' ?
-            { ...requestBody, status: OrderStatus.PENDING_CONFIRMATION.value } :
+            {
+                ...requestBody,
+                status: OrderStatus.PENDING_CONFIRMATION.value,
+                pendingConfirmationAt: new Date()
+            } :
             { ...requestBody }
 
 
@@ -203,14 +210,16 @@ const orderService = {
             ? OrderStatus.AWAITING_PAYMENT.value
             : OrderStatus.PENDING_CONFIRMATION.value;
 
+        const pendingConfirmationAt = requestBody.paymentMethod === 'cod' ? new Date() : null
+
         const isCustomer = role === ROLE.CUSTOMER.value
 
         if (isCustomer) {
-            return await Order.create({ ...requestBody, status, owner: user._id });
+            return await Order.create({ ...requestBody, status, pendingConfirmationAt, owner: user._id });
         } else {
             const newGuest = await User.create({ lastName: 'Khách vãng lai' });
             if (newGuest) console.log('newGuest', newGuest)
-            return await Order.create({ ...requestBody, status, owner: newGuest._id });
+            return await Order.create({ ...requestBody, status, pendingConfirmationAt, owner: newGuest._id });
         }
     },
 
@@ -268,16 +277,36 @@ const orderService = {
         return { success: true };
     },
 
+
     extractPatchedData(requestBody) {
         switch (requestBody.status) {
-            case OrderStatus.READY_FOR_PICKUP.value:
-            case OrderStatus.SHIPPING_ORDER.value:
+            case OrderStatus.READY_FOR_PICKUP.value: {
+                return {
+                    status: requestBody.status,
+                    readyForPickupAt: new Date()
+                }
+            }
+            case OrderStatus.SHIPPING_ORDER.value: {
+                return {
+                    status: requestBody.status,
+                    shippingOrderAt: new Date()
+                }
+            }
             case OrderStatus.COMPLETED.value: {
-                return { status: requestBody.status, shipper: requestBody.shipper }
+                return {
+                    status: requestBody.status,
+                    shipper: requestBody.shipper,
+                    completedAt: new Date()
+                }
             }
             case OrderStatus.CANCELLED.value:
             case OrderStatus.FAILED_DELIVERY.value: {
-                return { status: requestBody.status, shipper: requestBody.shipper, cancelReason: requestBody.cancelReason }
+                return {
+                    status: requestBody.status,
+                    shipper: requestBody.shipper,
+                    cancelReason: requestBody.cancelReason,
+                    cancelledAt: new Date()
+                }
             }
 
             default: {
@@ -374,6 +403,21 @@ const orderService = {
         )
         return responseData
     },
+
+    formatTimelines(order) {
+        return {
+            ...order,
+            createdAt: toVietnamTime(order.createdAt),
+            updatedAt: toVietnamTime(order.updatedAt),
+            fulfillmentDateTime: toVietnamTime(order.fulfillmentDateTime),
+            completedAt: toVietnamTime(order.completedAt),
+            pendingConfirmationAt: toVietnamTime(order.pendingConfirmationAt),
+            readyForPickupAt: toVietnamTime(order.readyForPickupAt),
+            shippingOrderAt: toVietnamTime(order.shippingOrderAt),
+            cancelledAt: toVietnamTime(order.cancelledAt)
+        };
+    },
+
 
     async getOrderItemInfo(orderItem, enableToppingItem = true) {
         if (!mongoose.Types.ObjectId.isValid(orderItem.variant)) {
