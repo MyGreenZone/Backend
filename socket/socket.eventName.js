@@ -6,6 +6,7 @@ const EVENT_NAME = {
     EMPLOYEE_JOIN_ORDER: 'employee.joinOrder',
     EMPLOYEE_LEAVE_ORDER: 'employee.leaveOrder',
 
+    ORDER_NEW: 'order.new',
     ORDER_UPDATE_STATUS: 'order.updateStatus',
     ORDER_ASSIGNED: 'order.assign',
 

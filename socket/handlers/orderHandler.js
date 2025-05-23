@@ -1,6 +1,11 @@
 const EVENT_NAME = require('../socket.eventName')
 
 const orderHandler = (io, socket) => {
+
+    socket.on(EVENT_NAME.ORDER_NEW, (data) => {
+        io.to(data.storeId).emit(EVENT_NAME.ORDER_NEW, data)
+        console.log(`📦 New order ${data.orderId} to store ${data.storeId}`);
+    })
     /**
     * ORDER_ASSIGNED
     * Khi nhân viên chọn người giao hàng

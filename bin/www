@@ -7,7 +7,10 @@
 var app = require('../src/app');
 var debug = require('debug')('code:server');
 var http = require('http');
-const socketService = require('../socket/socketService')
+const {socketService} = require('../socket/socketService')
+const jwt = require('jsonwebtoken');
+const config = require("../configs/envConfig");
+const AuthMiddleWare = require('../middleware/auth')
 /**
  * Get port from environment and store in Express.
  */
@@ -29,8 +32,29 @@ server.listen(port, () => {
   console.log('✅ Server started on port', port);
 });
 
+const io = require('socket.io')(server, {
+  path: '/socket.io/',
+  transports: ['websocket'],
+});
 
-const io = require('socket.io')(server)
+io.use(async (socket, next) => {
+  try {
+    const token = socket.handshake.auth.token;
+    if (!token) {
+      return next(new Error('Authentication error: No token provided'));
+    }
+    const decoded = jwt.verify(token, config.SECRETKEY);
+    const { phoneNumber, role } = decoded;
+    const user = await AuthMiddleWare.authorize(phoneNumber, role);
+    if (!user) {
+      return next(new Error('Authentication error: User not found'));
+    }
+    socket.data = {user, phoneNumber, role};
+    next();
+  } catch (err) {
+    next(new Error('Authentication error: ' + err.message));
+  }
+});
 
 socketService(io)
 
@@ -96,3 +120,5 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
+
+
