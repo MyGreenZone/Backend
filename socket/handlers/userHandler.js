@@ -5,10 +5,10 @@ const userHandler = (io, socket) => {
     const { user, phoneNumber, role } = socket.data
 
     socket.on(EVENT_NAME.USER_JOIN_ORDER, async (data) => {
-        const { orderId, userId, storeId } = data
+        const { orderId, storeId } = data
         socket.join(orderId)
         try {
-            // 🔍 Truy vấn order từ DB
+      
             const order = await Order.findById(orderId).select('fulfillmentDateTime');
 
             if (!order) {
@@ -16,10 +16,9 @@ const userHandler = (io, socket) => {
                 return;
             }
 
-            // 🕒 Định dạng thời gian (tuỳ cách bạn muốn hiển thị)
+
             const formattedTime = formatVietnamDatetime(order.fulfillmentDateTime)
 
-            // 📢 Gửi tới store room
             io.to(storeId).emit(EVENT_NAME.ORDER_NEW, {
                 orderId,
                 storeId,

@@ -12,7 +12,7 @@ const toVietnamTime = (date) => {
 // ➕ Hàm mới: format dạng 'DD/MM/YYYY lúc HH:mm'
 const formatVietnamDatetime = (date) => {
     return date
-        ? dayjs(date).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY lúc HH:mm')
+        ? dayjs(date).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY, HH:mm')
         : null;
 };
 
