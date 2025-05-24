@@ -162,6 +162,96 @@ orderRouter.post('/create', AuthMiddleWare.verifyToken, orderController.createOr
 orderRouter.get('/my-order', AuthMiddleWare.verifyToken, orderController.getMyOrders);
 
 
+
+/**
+ * @swagger
+ * /v1/order/store/all:
+ *   get:
+ *     summary: Lấy danh sách đơn hàng của cửa hàng (Only for staff)
+ *     tags: [Order]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: ['awaitingPayment', 'pendingConfirmation', 'processing', 'readyForPickup', 'shippingOrder','completed', 'cancelled']
+ *         description: Trạng thái đơn hàng
+ *     responses:
+ *       200:
+ *         description: Lấy danh sách đơn hàng thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Get orders successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     description: Thông tin chi tiết từng đơn hàng
+ *       401:
+ *         description: Không được xác thực (thiếu hoặc sai token)
+ *       500:
+ *         description: Lỗi server nội bộ
+ */
+orderRouter.get('/store/all', AuthMiddleWare.verifyToken, orderController.getStoreOrders);
+
+
+/**
+ * @swagger
+ * /v1/order/store/today/all:
+ *   get:
+ *     summary: Lấy danh sách đơn hàng hôm nay của cửa hàng (Only for staff)
+ *     tags: [Order]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: ['awaitingPayment', 'pendingConfirmation', 'processing', 'readyForPickup', 'shippingOrder','completed', 'cancelled']
+ *         description: Trạng thái đơn hàng
+ *     responses:
+ *       200:
+ *         description: Lấy danh sách đơn hàng thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Get orders successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     description: Thông tin chi tiết từng đơn hàng
+ *       401:
+ *         description: Không được xác thực (thiếu hoặc sai token)
+ *       500:
+ *         description: Lỗi server nội bộ
+ */
+orderRouter.get('/store/today/all', AuthMiddleWare.verifyToken, orderController.getTodayStoreOrders);
+
 /**
  * @swagger
  * /v1/order/{orderId}:

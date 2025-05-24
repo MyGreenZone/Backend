@@ -42,6 +42,68 @@ const orderService = {
         return { statusCode: 201, success: true, message: 'Created order successfully', data: newOrder }
     },
 
+    async getStoreOrders(phoneNumber, role, status) {
+        // authen
+        if (role !== ROLE.STAFF.value) return { statusCode: 401, success: false, message: 'Unauthorized' }
+        const staff = await AuthMiddleWare.authorize(phoneNumber, role)
+        if (!staff) return { statusCode: 401, success: false, message: 'Unauthorized' }
+
+        const storeId = staff.workingStore
+        const orders = await Order.find({ status, store: storeId }).sort({ createdAt: 'descending' })
+
+        // console.log('orders', orders)
+        const responseData = await Promise.all(
+            orders.map(async order => {
+                console.log('orderId', order._id)
+                const detail = await this.getOrderDetail(phoneNumber, role, order._id, false)
+                return detail.data
+            })
+        )
+
+        return { statusCode: 200, success: true, message: 'Get store orders successfully', data: responseData }
+    },
+
+    async getTodayStoreOrders(phoneNumber, role, status) {
+        // authen
+        if (role !== ROLE.STAFF.value)
+            return { statusCode: 401, success: false, message: 'Unauthorized' }
+
+        const staff = await AuthMiddleWare.authorize(phoneNumber, role)
+        if (!staff)
+            return { statusCode: 401, success: false, message: 'Unauthorized' }
+
+        const storeId = staff.workingStore
+
+        // Tính thời gian bắt đầu và kết thúc của ngày hôm nay
+        const startOfDay = new Date()
+        startOfDay.setHours(0, 0, 0, 0)
+
+        const endOfDay = new Date()
+        endOfDay.setHours(23, 59, 59, 999)
+
+        const orders = await Order.find({
+            status,
+            store: storeId,
+            createdAt: { $gte: startOfDay, $lte: endOfDay }
+        }).sort({ createdAt: 'descending' })
+
+        const responseData = await Promise.all(
+            orders.map(async order => {
+                console.log('orderId', order._id)
+                const detail = await this.getOrderDetail(phoneNumber, role, order._id, false)
+                return detail.data
+            })
+        )
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Get store orders successfully',
+            data: responseData
+        }
+    },
+
+
     async getMyOrders(phoneNumber, role, status) {
 
         // authen
@@ -52,18 +114,16 @@ const orderService = {
         // after authen successfully
         let myOrders = []
         if (!status) {
-            myOrders = await Order.find({ status: { $in: OrderStatus.getInProgressValues() }, owner: user._id }).sort({createdAt: 'descending'})
+            myOrders = await Order.find({ status: { $in: OrderStatus.getInProgressValues() }, owner: user._id }).sort({ createdAt: 'descending' })
         } else if (status === OrderStatus.COMPLETED.value) {
-            myOrders = await Order.find({ status: OrderStatus.COMPLETED.value, owner: user._id }).sort({createdAt: 'descending'})
+            myOrders = await Order.find({ status: OrderStatus.COMPLETED.value, owner: user._id }).sort({ createdAt: 'descending' })
         } else if (status === OrderStatus.CANCELLED.value) {
-            myOrders = await Order.find({ status: { $in: OrderStatus.getCancelledValues() }, owner: user._id }).sort({createdAt: 'descending'})
+            myOrders = await Order.find({ status: { $in: OrderStatus.getCancelledValues() }, owner: user._id }).sort({ createdAt: 'descending' })
         }
 
         const responseData = await Promise.all(
             myOrders.map(async order => {
-                console.log('orderId', order._id)
                 const detail = await this.getOrderDetail(phoneNumber, role, order._id, false)
-                console.log('detail', detail)
                 return detail.data
             })
         )

@@ -39,6 +39,51 @@ const orderController = {
         }
     },
 
+    async getStoreOrders(req, res) {
+        try {
+            const { phoneNumber, role } = req.user
+
+            const { status } = req.query
+            const result = await orderService.getStoreOrders(phoneNumber, role, status)
+            return res.status(result.statusCode).json({
+                ...result,
+                timestamp: new Date().toISOString(),
+                path: req.originalUrl
+            })
+        } catch (error) {
+            console.log('Error get store orders', error)
+            return res.status(500).json({
+                statusCode: 500,
+                success: false,
+                message: 'Error get store orders',
+                timestamp: new Date().toISOString(),
+                path: req.originalUrl
+            });
+        }
+    },
+     async getTodayStoreOrders(req, res) {
+        try {
+            const { phoneNumber, role } = req.user
+
+            const { status } = req.query
+            const result = await orderService.getStoreOrders(phoneNumber, role, status)
+            return res.status(result.statusCode).json({
+                ...result,
+                timestamp: new Date().toISOString(),
+                path: req.originalUrl
+            })
+        } catch (error) {
+            console.log('Error get store orders', error)
+            return res.status(500).json({
+                statusCode: 500,
+                success: false,
+                message: 'Error get store orders',
+                timestamp: new Date().toISOString(),
+                path: req.originalUrl
+            });
+        }
+    },
+
 
     async getMyOrders(req, res) {
         try {

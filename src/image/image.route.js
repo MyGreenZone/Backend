@@ -16,6 +16,8 @@ const fileRouter = express.Router();
  *     summary: Upload một file hình ảnh lên Cloudinary
  *     tags:
  *       - File
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -49,6 +51,7 @@ const fileRouter = express.Router();
 fileRouter.post(
     '/image/upload',
     upload.single('file'),
+    AuthMiddleWare.verifyToken,
     uploadSingleFile
 );
 
