@@ -8,7 +8,7 @@ const EVENT_NAME = {
 
     ORDER_NEW: 'order.new',
     ORDER_UPDATE_STATUS: 'order.updateStatus',
-    ORDER_ASSIGNED: 'order.assign',
+    ORDER_ASSIGNED: 'order.assigned',
 
     // ORDER_NEW_MESSAGE: 'order.newMessage',
     // ORDER_SEND_MESSAGE: 'order.sendMessage',

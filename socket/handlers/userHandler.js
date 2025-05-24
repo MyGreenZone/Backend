@@ -8,7 +8,7 @@ const userHandler = (io, socket) => {
         const { orderId, storeId } = data
         socket.join(orderId)
         try {
-      
+
             const order = await Order.findById(orderId).select('fulfillmentDateTime');
 
             if (!order) {
@@ -31,9 +31,10 @@ const userHandler = (io, socket) => {
     })
 
 
-    socket.on(EVENT_NAME.USER_LEAVE_ORDER, ({ userId, orderId }) => {
+    socket.on(EVENT_NAME.USER_LEAVE_ORDER, (data) => {
+        const { orderId } = data
         socket.leave(orderId)
-        console.log(`${userId} left order room: ${orderId}`)
+        console.log(`Customer left order room: ${orderId}`)
     })
 
 }

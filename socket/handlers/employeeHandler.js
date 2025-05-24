@@ -29,9 +29,10 @@ const employeeHandler = (io, socket) => {
     * EMPLOYEE_LEAVE_ORDER
     * Khi đơn hoàn thành hoặc bị hủy, employee thoát khỏi room order
     */
-    socket.on(EVENT_NAME.EMPLOYEE_LEAVE_ORDER, ({ employeeId, orderId }) => {
+    socket.on(EVENT_NAME.EMPLOYEE_LEAVE_ORDER, (data) => {
+        const {orderId} = data
         socket.leave(orderId)
-        console.log(`${employeeId} left order room: ${orderId}`)
+        console.log(`Delivery employee left order room: ${orderId}`)
     })
 }
 module.exports = employeeHandler
