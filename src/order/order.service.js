@@ -52,16 +52,17 @@ const orderService = {
         // after authen successfully
         let myOrders = []
         if (!status) {
-            myOrders = await Order.find({ status: { $in: OrderStatus.getInProgressValues() }, owner: user._id })
+            myOrders = await Order.find({ status: { $in: OrderStatus.getInProgressValues() }, owner: user._id }).sort({createdAt: 'descending'})
         } else if (status === OrderStatus.COMPLETED.value) {
-            myOrders = await Order.find({ status: OrderStatus.COMPLETED.value, owner: user._id })
+            myOrders = await Order.find({ status: OrderStatus.COMPLETED.value, owner: user._id }).sort({createdAt: 'descending'})
         } else if (status === OrderStatus.CANCELLED.value) {
-            myOrders = await Order.find({ status: { $in: OrderStatus.getCancelledValues() }, owner: user._id })
+            myOrders = await Order.find({ status: { $in: OrderStatus.getCancelledValues() }, owner: user._id }).sort({createdAt: 'descending'})
         }
 
         const responseData = await Promise.all(
             myOrders.map(async order => {
-                const detail = await this.getOrderDetail(phoneNumber, order._id, false)
+                console.log('orderId', order._id)
+                const detail = await this.getOrderDetail(phoneNumber, role, order._id, false)
                 console.log('detail', detail)
                 return detail.data
             })
@@ -275,7 +276,7 @@ const orderService = {
                     return {
                         statusCode: 400,
                         success: false,
-                        message: 'Tạo đơn thất bại. Khách hàng chưa đổi voucher này. Không thể sử dụng'
+                        message: 'Tạo đơn thất bại. Khách hàng chưa đổi voucher Độc quyền này. Không thể sử dụng'
                     };
                 }
 

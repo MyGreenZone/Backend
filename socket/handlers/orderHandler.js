@@ -30,8 +30,6 @@ const orderHandler = (io, socket) => {
                 ...data,
                 message: `Đơn hàng ${orderId} vừa được giao cho nhân viên ${employee.firstName} ${employee.lastName}`
             })
-
-
             console.log(`🚚 Order ${orderId} assigned to employee ${assignedTo}`);
         } catch (error) {
             console.error('Socket. Error when get order', err);

@@ -159,7 +159,7 @@ orderRouter.post('/create', AuthMiddleWare.verifyToken, orderController.createOr
  *       500:
  *         description: Lỗi server nội bộ
  */
-orderRouter.get('/my-order', orderController.getMyOrders);
+orderRouter.get('/my-order', AuthMiddleWare.verifyToken, orderController.getMyOrders);
 
 
 /**
