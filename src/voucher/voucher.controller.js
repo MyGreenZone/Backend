@@ -124,6 +124,26 @@ const voucherController = {
                 message: 'Error get my vouchers',
             });
         }
+    },
+
+    async getGlobalVouchers(req, res) {
+        try {
+            const result = await voucherService.getGlobalVouchers()
+            return res.status(result.statusCode).json({
+                ...result,
+                timestamp: new Date().toISOString(),
+                path: req.originalUrl
+            })
+        } catch (error) {
+            console.log("Error get global vouchers", error);
+            return res.status(500).json({
+                statusCode: 500,
+                success: false,
+                message: 'Error get global vouchers',
+                timestamp: new Date().toISOString(),
+                path: req.originalUrl
+            });
+        }
     }
 }
 

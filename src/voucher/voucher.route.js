@@ -112,6 +112,35 @@ voucherRouter.post('/create', voucherController.createVoucher)
 voucherRouter.get('/all', voucherController.getAllVouchers)
 
 
+
+/**
+ * @swagger
+ * /v1/voucher/global:
+ *   get:
+ *     summary: Lấy danh sách tất cả các voucher global
+ *     tags:
+ *       - Voucher
+ *     responses:
+ *       200:
+ *         description: Danh sách voucher được trả về thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       500:
+ *         description: Lỗi server
+ */
+voucherRouter.get('/global', voucherController.getGlobalVouchers)
+
+
 /**
  * @swagger
  * /v1/voucher/my-voucher:

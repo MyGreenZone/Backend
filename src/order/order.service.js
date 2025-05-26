@@ -283,15 +283,16 @@ const orderService = {
             : OrderStatus.PENDING_CONFIRMATION.value;
 
         const pendingConfirmationAt = requestBody.paymentMethod === 'cod' ? new Date() : null
+        const shippingFee = requestBody.deliveryMethod === DeliveryMethod.DELIVERY.value ? 20000 : 0
 
         const isCustomer = role === ROLE.CUSTOMER.value
 
         if (isCustomer) {
-            return await Order.create({ ...requestBody, status, pendingConfirmationAt, owner: user._id });
+            return await Order.create({ ...requestBody, status, pendingConfirmationAt, owner: user._id, shippingFee });
         } else {
             const newGuest = await User.create({ lastName: 'Khách vãng lai' });
             if (newGuest) console.log('newGuest', newGuest)
-            return await Order.create({ ...requestBody, status, pendingConfirmationAt, owner: newGuest._id });
+            return await Order.create({ ...requestBody, status, pendingConfirmationAt, owner: newGuest._id, shippingFee });
         }
     },
 

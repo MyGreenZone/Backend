@@ -16,7 +16,7 @@ const voucherService = {
     },
 
     async getAllVouchers() {
-        const vouchers = await Voucher.find({ status: 'active' })
+        const vouchers = await Voucher.find({ status: 'active', endDate: { $gte: new Date() } })
         return { statusCode: 200, success: true, message: 'Get all vouchers successfully', data: vouchers }
     },
 
@@ -106,6 +106,11 @@ const voucherService = {
             return voucher.voucherId
         })
         return { statusCode: 200, success: true, message: 'Get my vouchers successfully', data: responseData }
+    },
+
+    async getGlobalVouchers() {
+        const globalVouchers = await Voucher.find({ status: 'active', voucherType: 'global', endDate: { $gte: new Date() } }).lean()
+        return { statusCode: 200, success: true, message: 'Get global vouchers successfully', data: globalVouchers }
     }
 
 
