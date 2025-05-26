@@ -7,7 +7,7 @@ const AuthMiddleWare = require('../../middleware/auth')
 const statisticService = {
     async getMonthlyOrderCount(phoneNumber, role, year) {
         // Auth check
-        if (role === ROLE.STAFF.value)
+        if (role !== ROLE.STAFF.value)
             return { statusCode: 401, success: false, message: 'Unauthorized' }
 
         const staff = await AuthMiddleWare.authorize(phoneNumber, role)

@@ -8,7 +8,6 @@ const authService = {
     async employeeLogin(requestBody) {
         const { phoneNumber, password } = requestBody
         const employee = await Employee.findOne({ phoneNumber: phoneNumber.toString() })
-            .select('phoneNumber role _id password firstName lastName') 
             .lean();
 
         if (!employee || employee.password !== password)
