@@ -214,48 +214,6 @@ const authController = {
     }
   },
 
-  async getProfile(req, res) {
-    try {
-      // Lấy token từ header
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ statusCode: 401, success: false, message: 'Authorization token missing' });
-      }
-
-      const token = authHeader.split(' ')[1];
-
-      // Giải mã token
-      let payload;
-      try {
-        payload = jwt.verify(token, config.SECRETKEY);
-      } catch (err) {
-        return res.status(401).json({ statusCode: 401, success: false, message: 'Invalid or expired token' });
-      }
-
-      const phoneNumber = payload.phoneNumber;
-      if (!phoneNumber) {
-        return res.status(400).json({ statusCode: 400, success: false, message: 'Invalid token: missing phone number' });
-      }
-
-      // Tìm người dùng theo số điện thoại
-      const user = await User.findOne({ phoneNumber }).populate('roles');
-      if (!user) {
-        return res.status(404).json({ statusCode: 404, success: false, message: 'User not found' });
-      }
-
-      // Trả về thông tin người dùng
-      return res.status(200).json({
-        statusCode: 200,
-        success: true,
-        data: user
-      });
-
-    } catch (error) {
-      console.log('Get profile error:', error);
-      return res.status(500).json({ statusCode: 500, success: false, message: 'Internal server error' });
-    }
-  },
-
 
   async employeeLogin(req, res) {
     const { value, error } = employeeLoginValidator.validate(req.body, { abortEarly: false, convert: false });

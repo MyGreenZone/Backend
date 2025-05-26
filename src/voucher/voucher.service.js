@@ -101,8 +101,11 @@ const voucherService = {
         if (role !== ROLE.CUSTOMER.value) return { statusCode: 401, success: false, message: 'Unauthorized' }
         const user = await AuthMiddleWare.authorize(phoneNumber, role)
         if (!user) return { statusCode: 401, success: false, message: 'Unauthorized' }
-        const myVouchers = await UserVoucher.find({ userId: user._id, used: false })
-        return { statusCode: 200, success: true, message: 'Get my vouchers successfully', data: myVouchers }
+        const myVouchers = await UserVoucher.find({ userId: user._id, used: false }).select('voucherId').populate('voucherId').lean()
+        const responseData = myVouchers.map(voucher => {
+            return voucher.voucherId
+        })
+        return { statusCode: 200, success: true, message: 'Get my vouchers successfully', data: responseData }
     }
 
 

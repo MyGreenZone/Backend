@@ -1,7 +1,7 @@
 const express = require('express');
 const authController = require('./auth.controller');
 const AuthMiddleWare = require('../../middleware/auth')
-
+const userController = require('../user/user.controller');
 
 /**
  * @swagger
@@ -125,7 +125,7 @@ authRouter.post('/otp/register', AuthMiddleWare.verifyToken, authController.regi
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Lấy thông tin người dùng thành công
+ *         description: Lấy thông tin người dùng thành công (Only for customer)
  *         content:
  *           application/json:
  *             schema:
@@ -190,7 +190,7 @@ authRouter.post('/otp/register', AuthMiddleWare.verifyToken, authController.regi
  *       500:
  *         description: Lỗi hệ thống
  */
-authRouter.get('/profile', AuthMiddleWare.verifyToken, authController.getProfile);
+authRouter.get('/profile', AuthMiddleWare.verifyToken, userController.getProfile);
 
 
 
