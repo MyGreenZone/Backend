@@ -22,6 +22,22 @@ const userService = {
             success: true,
             data: user
         }
+    },
+
+    async updateProfile(phoneNumber, role, requestBody) {
+        if (role !== ROLE.CUSTOMER.value) {
+            return {
+                statusCode: 401,
+                success: false,
+                message: 'Unauthorized'
+            }
+        }
+        const user = await User.findOneAndUpdate({ phoneNumber }, requestBody, { new: true })
+        return {
+            statusCode: 200,
+            success: true,
+            data: user
+        }
     }
 }
 

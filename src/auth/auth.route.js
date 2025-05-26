@@ -192,7 +192,38 @@ authRouter.post('/otp/register', AuthMiddleWare.verifyToken, authController.regi
  */
 authRouter.get('/profile', AuthMiddleWare.verifyToken, userController.getProfile);
 
-
+/**
+ * @swagger
+ * /auth/update-profile:
+ *   patch:
+ *     tags: [Auth]
+ *     summary: Update User Profile
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [lastName]
+ *             properties:
+ *               firstName: { type: string, example: "Nguyen Van" }
+ *               lastName: { type: string, example: "A" }
+ *               email: { type: string, example: "greenzone@example.com" }
+ *               gender: { type: string, enum: [male, female, other], example: "male" }
+ *               avatar: { type: string }
+ *     responses:
+ *       201:
+ *         description: Cập nhật thông tin người dùng thành công
+ *       400:
+ *         description: Thiếu họ tên hoặc dữ liệu không hợp lệ
+ *       401:
+ *         description: Không có quyền truy cập (thiếu hoặc sai token)
+ *       500:
+ *         description: Lỗi hệ thống
+ */
+authRouter.patch('/update-profile', AuthMiddleWare.verifyToken, userController.updateProfile);
 
 /**
  * @swagger

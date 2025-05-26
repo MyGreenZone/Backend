@@ -219,7 +219,11 @@ const orderService = {
         )
             return { statusCode: 400, success: false, message: 'Đơn hàng đang tiến hành, khách hàng không thể hủy' }
         // console.log('order', JSON.stringify(order, null, 2))
-        if (user.workingStore.toString() !== order.store.toString())
+
+
+        if (user.role === ROLE.STAFF.value &&
+            user.workingStore.toString() !== order.store.toString()
+        )
             return {
                 statusCode: 401,
                 success: false,

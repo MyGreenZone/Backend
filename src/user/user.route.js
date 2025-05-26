@@ -5,6 +5,5 @@ const AuthMiddleWare = require('../middlewares/auth.middleware');
 
 
 
-router.get('/profile', AuthMiddleWare.authorize, userController.getProfile);
 
 module.exports = router;
